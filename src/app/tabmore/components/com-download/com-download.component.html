@@ -1,0 +1,19 @@
+
+<div class="download-community-popover">
+  <div class="com-dl-top" dir="ltr">
+    <div (click)="modal.dismiss()" class="right">Close</div>
+    QUIZCARD SET:
+  </div>
+  <div class="com-dl-title" dir="ltr">
+    {{ quiz.quizname }}
+  </div>
+  <div class="com-dl-desc" dir="ltr">
+    {{ quiz.quizdesc }}
+  </div>
+  <div class="com-dl-meta"  dir="ltr">
+    <strong dir="ltr">{{ quiz.cardcount }} cards</strong> &bull; Created by <strong>{{ quiz.quizauthor }}</strong>
+  </div>
+  <div style="width:100%;text-align:center;margin-top:10px">
+    <ion-button (click)="downloadQuiz(quiz)" style="font-size:16px">Download</ion-button>
+  </div>
+</div>

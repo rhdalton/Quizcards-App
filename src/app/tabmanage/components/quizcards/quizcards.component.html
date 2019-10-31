@@ -1,0 +1,38 @@
+
+<ion-content>
+
+  <ion-card *ngIf="Quiz" [ngClass]="Quiz.quizcolor" class="qcard std-card">
+    <ion-card-content>
+      <div (click)="cardSetOptions($event)" class="right set-settings"><img src="assets/icon/settings.svg"></div>
+      {{Quiz.quizname}}
+      <div class="card-count">{{Quiz.cardcount}} Card<span *ngIf="Quiz.cardcount!=1">s</span></div>
+      <div class="card-actions">
+        <div (click)="addCard()" class="add-action">+ ADD CARD</div>
+        <div *ngIf="Cards && Cards.length > 0" class="add-action card-view" (click)="switchView()"><img src="assets/icon/{{ Quiz.cardview }}.svg"></div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="_cardsloaded && Cards.length < 2" class="alert-notify">        
+    <ion-card-content *ngIf="Cards.length==0">
+      Note: For most effective Multiple Choice Quizzes, create cards that will have similar type of answers (dates, definitions, vocabulary etc). The Quiz will display the correct answer
+      along with 3 other random answers from other cards in this set. Having cards with different kinds of answers may make the choosing the correct answer easier.
+    </ion-card-content>
+    <ion-card-content *ngIf="Cards.length==1">
+        It's recommened to have at least 4 cards for effective Multiple Choice Quizzes.
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngFor="let c of Cards; let i = index" class="qcard cardlist quiz-color-white" [class.compact-view]="Cards.length>0 && Quiz.cardview=='compact-view'">
+    <ion-card-content>
+      <div class="right">
+        <div (click)="cardOptions($event, c.id)" class="edit-card"></div>
+      </div>
+        {{ i + 1 }}. 
+        <img *ngIf="c.c_image && Quiz.cardview=='detail-view'" class="card-image image-small" src="{{ c.c_image }}">
+        <img *ngIf="c.c_image && Quiz.cardview=='compact-view'" src="assets/icon/uploadimage.svg" style="vertical-align:top;display:inline-block;width:25px;"> {{c.c_text}}
+      <div *ngIf="Quiz.cardview=='detail-view'" class="card-detail">{{c.c_correct}}</div>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

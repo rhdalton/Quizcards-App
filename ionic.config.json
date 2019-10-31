@@ -1,5 +1,7 @@
 {
   "name": "quizcards-new",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }

@@ -1,0 +1,88 @@
+<ion-content>
+  <ion-card *ngIf="Quiz" class="qcard quiz-color-white">
+    <ion-card-content>
+      <form #f="ngForm" (ngSubmit)="save(f)">
+        
+        <div class="form-group">
+          <label><span dir="ltr">{{title}}:</span></label>
+          <input [(ngModel)]="Quiz.quizname" name="quizname" type="text" class="input-text bgfocus" placeholder="Card set name...">
+          <div [hidden]="!errorMsg" class="danger">{{errorMsg}}</div>
+        </div>
+
+        <div class="form-group">
+          <label><span dir="ltr">Set Color:</span></label>
+          <ion-radio-group [(ngModel)]="Quiz.quizcolor" name="quizcolor">
+            <ion-radio class="radio-white" value="quiz-color-white"></ion-radio>
+            <ion-radio class="radio-blue" value="quiz-color-blue"></ion-radio>
+            <ion-radio class="radio-red" value="quiz-color-red"></ion-radio>
+            <ion-radio class="radio-green" value="quiz-color-green"></ion-radio>
+            <ion-radio class="radio-yellow" value="quiz-color-yellow"></ion-radio>
+            <ion-radio class="radio-purple" value="quiz-color-purple"></ion-radio>
+            <ion-radio class="radio-orange" value="quiz-color-orange"></ion-radio>
+          </ion-radio-group>
+        </div>
+
+        <div class="form-group bb">
+          <ion-item-divider class="noborder" no-padding>
+            <ion-toggle [(ngModel)]="formFields.switchtext" name="switchtext" slot="end"></ion-toggle>
+            Switch Text & Answer
+          </ion-item-divider>
+          <div class="sm" dir="ltr">Switch card text and answer to study & quiz reverse format.</div>
+        </div>
+
+        <h2 (click)="toggleMoreoptions()" style="margin:15px 0 30px;">
+          <ion-icon style="vertical-align:top;" [attr.name]="_moreoptions?'arrow-dropdown':'arrow-dropright'"></ion-icon>
+          <strong>More Settings</strong>
+        </h2>
+
+        <div [hidden]="!_moreoptions">
+          <div class="form-group">
+            <ion-item-divider no-padding>
+              <ion-toggle [(ngModel)]="formFields.studyorder" name="studyShuffle" slot="end"></ion-toggle>
+              Shuffle Study card order
+            </ion-item-divider>
+            <ion-item-divider no-padding>
+              <ion-toggle [(ngModel)]="formFields.quizorder" name="quizShuffle" slot="end"></ion-toggle>
+              Shuffle Quiz card order
+            </ion-item-divider>
+          </div>
+
+          <div class="form-group">
+            <label dir="ltr">Quiz Timer:</label>
+            <div [hidden]="!isPro">
+              <ion-range [(ngModel)]="Quiz.quizTimer" name="quizTimer" min="0" max="30" pin="true" step="2" snaps="true" no-padding>
+                  <ion-label slot="start">Off</ion-label>
+                  <ion-label slot="end">30</ion-label>
+                </ion-range>
+              <div class="sm"><span dir="ltr">Time allowed to answer each Card in seconds. Set to 0 to disable timer.</span></div>
+            </div>
+            <div [hidden]="isPro" class="sm">Upgrade Pro account to enable Quiz Timer feature.</div>
+          </div>
+
+          <div class="form-group">
+            <label><span dir="ltr">Cards per Quiz:</span></label>
+            <ion-range [(ngModel)]="Quiz.quizLimit" name="quizLimit" min="10" max="50" step="5" snaps="true" pin="true" no-padding>
+              <ion-label slot="start">10</ion-label>
+              <ion-label slot="end">50</ion-label>
+            </ion-range>
+            <div class="sm"><span dir="ltr">Quizzes will automatically prioritize cards that you get incorrect most.</span></div>
+          </div>
+
+          <div class="form-group">
+            <label><span dir="ltr">Text-to-Speech for:</span></label>
+            <select [(ngModel)]="Quiz.tts" name="tts" class="input-select bgfocus">
+              <option *ngFor="let t of ttsfield" value="{{ t.tts }}">{{ t.text }}</option>
+            </select>
+
+            <ion-item [hidden]="Quiz.tts==''" class="noformat" lines="none">
+              <ion-checkbox [(ngModel)]="formFields.ttsonly" name="ttsaudioquiz"></ion-checkbox>  
+              <ion-label>TTS audio only Quiz mode</ion-label>                      
+            </ion-item>
+          </div>
+        </div>
+
+        <ion-button type="submit" expand="block">Save Card Set</ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

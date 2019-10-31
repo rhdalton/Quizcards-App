@@ -1,0 +1,39 @@
+<ion-card class="qcard quiz-color-white app-settings">
+
+  <ion-item-divider class="header-text">
+    <div class="ion-item-divider-inner" dir="ltr">
+        QuizCard App Settings:
+    </div>    
+  </ion-item-divider>
+
+  <ion-item-divider>
+  <ion-toggle slot="end" (ionChange)="toggleSetting()" [(ngModel)]="_app.showAnswer"></ion-toggle>
+    Show answer on Study cards 
+  </ion-item-divider>
+
+  <ion-item-divider>
+    <ion-toggle slot="end" (ionChange)="toggleSetting()" [(ngModel)]="_app.quizAudio"></ion-toggle>
+      Enable Correct/Incorrect sound
+  </ion-item-divider>
+
+  <ion-item-divider>
+    <ion-toggle slot="end" (ionChange)="toggleSetting()" [(ngModel)]="_app.rtl"></ion-toggle>
+    <div>
+      App RTL view
+      <div dir="ltr" class="sm">App restart required to see change.</div>
+    </div>
+  </ion-item-divider>
+  
+  <ion-item-divider class="text-header">
+    QuizCards App Details
+  </ion-item-divider>
+
+  <ion-item-divider>
+    App Version: {{ _app.appVersion | number:'1.2-2' }}
+  </ion-item-divider>
+
+  <ion-item-divider>
+    Database Version: {{ _app.dbVersion | number:'1.1-1' }}
+  </ion-item-divider>
+  
+  </ion-card>

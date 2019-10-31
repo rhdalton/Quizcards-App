@@ -1,0 +1,27 @@
+
+<div class="achievement-detail-popover">
+  <div class="com-dl-top" dir="ltr">
+    <div (click)="modal.dismiss()" class="right">Close</div>
+    ACHIEVEMENT:
+  </div>
+  <div class="com-dl-title" dir="ltr">
+    {{ach.title}}
+  </div>
+  <div class="com-dl-desc" dir="ltr">
+    {{ach.desc}}
+  </div>
+  <div class="com-dl-meta lh-5" style="text-align: center">
+    <strong>Current Rank: {{a.rank}}</strong>
+    <div class="badge-row">
+      <div *ngFor="let b of a.badges; let i = index" class="badge bl rank{{a.maxrank}}bg rank-{{i+1}} user-has"><img src="assets/badges/{{a.image}}.png"></div>
+    </div>
+  </div>
+  <div class="com-dl-meta lh-5">
+    <div class="right"><strong>Requirement</strong></div>
+    <strong>Rank: Title Earned</strong>
+    <div *ngFor="let d of ach.badges; let i = index">
+    <div class="right">{{d.desc}}</div>
+      {{i + 1}}: {{d.title}}
+    </div>
+  </div>
+</div>

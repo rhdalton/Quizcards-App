@@ -1,0 +1,42 @@
+<ion-content>
+<ion-card class="qcard quiz-color-white">
+    <ion-item-divider class="header-text">
+      <div class="ion-item-divider-inner" dir="ltr">
+        <img style="width:24px;margin-right:5px;display:inline-block" src="assets/icon/upgrade.svg"> Upgrade Account to Pro:
+      </div>
+    </ion-item-divider>
+    <ion-item-divider>
+      <div class="ion-item-divider-inner">
+        <span dir="ltr">Like the App? Help support the growth and development of QuizCards by upgrading your account. Pro accounts also get these benefits:</span>
+        <ul>
+          <li>Create up to 200 cards per set</li>
+          <li>Save up to 20 sets on the cloud</li>
+          <li>Backup & share cards with images</li>
+          <li>Advanced card fields</li>
+          <li>Enable timer for quiz modes</li>
+          <li>Automatically get any new Pro account benefits in the future</li>
+        </ul>
+        <div *ngIf="!User" class="alert alert-notify">
+            <span dir="ltr">You must login to your QuizCards account to upgrade.</span>
+        </div>
+        <div *ngIf="User && isPro" class="alert alert-notify">
+            <span dir="ltr">Your account is already upgraded to Pro.</span>
+        </div>
+        <div *ngIf="!productReady && User && !isPro" class="alert alert-notify">
+          <span dir="ltr">Generating upgrade button...</span>
+        </div>
+        <div *ngIf="productReady && User && !isPro">
+          <span dir="ltr">One time payment of <strong>{{ Product.price }} {{ Product.currency }}.</strong></span>
+          <br /><br />
+          <ion-button (click)="doUpgrade()" expand="full" color="tertiary">Upgrade Now</ion-button>
+          <br />
+          <div class="sm">
+            <span dir="ltr">* The Pro upgrade will be applied to your QuizCards account only ({{ User.displayName }}), not your Google Play account.
+            You must be logged on your QuizCards account in the App to take advantage of the Pro account benefits.</span>
+          </div>
+        </div>
+      </div>
+    </ion-item-divider>
+
+  </ion-card>
+</ion-content>

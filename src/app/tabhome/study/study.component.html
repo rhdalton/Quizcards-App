@@ -1,0 +1,69 @@
+
+<ion-content>
+  <div *ngIf="Card; else studyEnd">
+    <ion-slides [options]="slideOpts">
+      <ion-slide>
+        <ion-card class="qcard quizcard {{Quiz.quizcolor}}" (swipe)="swipeCard($event)" [@animateCard]="_cardCountSwipe">
+          <div class="quiz-header qctext">
+            <div class="right">CARD {{currentcard}} / {{Quiz.cardcount}}</div>
+            {{Quiz.quizname}}
+          </div>
+          <ion-card-content>
+            <div class="card-text {{fontsize}} {{qcardsize}}">              
+              <div *ngIf="Quiz.switchtext==0; else switch" dir="ltr">
+                <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image" src="{{Card.c_image}}" />
+                {{Card.c_text}}
+                <div [hidden]="!Card.c_subtext" class="sm card-subtext" dir="ltr">
+                  {{Card.c_subtext}}
+                </div>
+                <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
+                  <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audioActive" (click)="playAudio(300)"></ion-icon>
+                </div>
+              </div>
+              <ng-template #switch>
+                <div dir="ltr">
+                  {{Card.c_study}}
+                  <div [hidden]="!Card.c_substudy" class="sm card-subtext" dir="ltr">
+                    {{Card.c_substudy}}
+                  </div>
+                </div>
+              </ng-template>
+            </div>
+            <div class="card-answer bt {{qcardsize}}">
+              <div [hidden]="!_viewAnswer">
+                <div *ngIf="Quiz.switchtext==0; else switchans" dir="ltr">
+                  {{Card.c_study}}
+                  <div [hidden]="!Card.c_substudy" class="sm card-substudy" dir="ltr">{{Card.c_substudy}}</div>
+                </div>
+                <ng-template #switchans>
+                    <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image" src="{{Card.c_image}}" />
+                  <div dir="ltr">
+                    {{Card.c_text}}
+                    <div [hidden]="!Card.c_substudy" class="sm card-substudy" dir="ltr">{{Card.c_subtext}}</div>
+                    <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
+                      <ion-icon name="volume-high" class="audio-small" [class.audio-large-active]="audioActive" (click)="playAudio(300)"></ion-icon>
+                    </div>
+                  </div>
+                </ng-template>                
+              </div>
+              <div [hidden]="_viewAnswer" (click)="showAnswer()" style="padding-bottom:50px;">[show answer]</div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-slide>
+    </ion-slides>
+
+    <ion-card class="qcard quizcard study-nav {{Quiz.quizcolor}}">
+      <ion-card-content>
+        <span (click)="nextCard()" class="right">NEXT ></span>
+        <span *ngIf="currentcard > 1" (click)="prevCard()">< PREV</span>&nbsp;
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ng-template #studyEnd>  
+    <app-quizresult *ngIf="studyFinished" [quizId]="Quiz.id" [quizType]="'study'" [reload]="reload"></app-quizresult>
+  </ng-template>
+
+</ion-content>
+  

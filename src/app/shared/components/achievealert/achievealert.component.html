@@ -1,0 +1,28 @@
+
+<div *ngIf="alertLoaded" class="achievement-detail-popover">
+  <div class="com-dl-top" dir="ltr">
+    <div (click)="modal.dismiss()" class="right">Close</div>
+    BADGE EARNED!
+  </div>
+  <div class="com-dl-title" dir="ltr" style="text-align:center;">
+    Congratulations!
+  </div>
+  <div class="com-dl-desc lh-5" dir="ltr" style="text-align:center">
+    You've earned a badge and the new title:<br />
+    <strong>{{newtitle}}</strong><br />
+    {{desc}} ({{rankdesc}})
+  </div>
+  <div class="com-dl-meta lh-5" style="text-align: center">      
+    <div class="badge-row">
+      <div class="badge bxl rank{{maxrank}}bg rank-{{achdata.rank}} user-has"><img src="assets/badges/{{image}}.png"></div>
+      <br />
+      <strong>New Rank: {{achdata.rank}}</strong>
+    </div>      
+  </div>
+  <div *ngIf="user && user.uid!=''" class="com-dl-meta lh-5">
+    Go to <strong>Account > Achievements & Badges</strong> tab to view all the achievements you've earned!
+  </div>
+  <div *ngIf="user && user.uid==''" class="com-dl-meta lh-5">
+    Create a QuizCards account to track all your badges and achievements!
+  </div>
+</div>

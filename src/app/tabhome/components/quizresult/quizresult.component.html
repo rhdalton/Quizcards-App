@@ -1,0 +1,74 @@
+<ion-content>
+  <ion-card class="qcard quiz-color-white">
+    <ion-item-divider class="header-text">
+      <span dir="ltr" *ngIf="quizType!='study'">Quiz Results:</span>
+      <span dir="ltr" *ngIf="quizType=='study'">End of Study Cards</span>
+    </ion-item-divider>
+
+    <ion-item-divider *ngIf="quizType=='study'">
+      <div class="ion-item-divider-inner">
+        You've completed these study cards. Try taking quiz to see how much you remember.
+      </div>
+    </ion-item-divider>
+    <ion-item-divider *ngIf="quizType!='study'">
+      <div class="ion-item-divider-inner">
+        <div class="result-chart">
+          <svg viewBox="0 0 36 36" class="circular-chart orange">
+            <path class="circle-bg"
+              d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path class="circle"
+              [attr.stroke-dasharray]="dasharray"
+              d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <text x="18" y="20.35" class="percentage" dir="ltr">{{ percentCorrect }}%</text>
+          </svg>
+        </div>
+        <div dir="ltr" style="text-align:center;"><strong>You got {{ totalCorrect }} out of {{ totalcards }} correct.</strong></div>
+        <br /><br />
+        <div dir="ltr">You can view the details of your quiz below or continue reviewing and quizzing.</div>
+      </div>
+    </ion-item-divider>
+    
+    <ion-item-divider routerLink="/tabs/tabhome/study/{{quizId}}{{reload!=''?'':'/1'}}">
+      <div class="ion-item-divider-inner">
+        <ion-icon name="arrow-dropright"></ion-icon> Review Study Cards<span *ngIf="quizType=='study'"> Again</span>
+      </div>
+    </ion-item-divider>
+  
+    <ion-item-divider (click)="quizTypePopover($event)">
+      <div class="ion-item-divider-inner">
+        <ion-icon name="arrow-dropright"></ion-icon> Try a Quiz<span *ngIf="quizType!='study'"> Again</span>
+      </div>
+    </ion-item-divider>
+  </ion-card>
+
+  <ion-card *ngIf="quizType!='study'" class="qcard quiz-color-white">
+    <ion-item-divider (click)="viewDetailedResults()">
+      <div class="ion-item-divider-inner">
+        <ion-icon [attr.name]="showResults?'arrow-dropdown':'arrow-dropright'"></ion-icon> View Result Details
+        <div *ngIf="showResults" class="sm">Tap an answer to see details.</div>
+      </div>
+    </ion-item-divider>
+    <div *ngIf="showResults">
+      <ion-item-divider *ngFor="let r of quizResults; let i = index" (click)="answerDetail(i)" [class]="r.isCorrect?'result-detail correct-answer':'result-detail incorrect-answer'">
+        <ion-icon [class]="r.isCorrect?'correct-answer':'incorrect-answer'" [attr.name]="r.isCorrect?'checkmark':'close'" slot="end"></ion-icon>
+          <div class="ion-item-divider-inner">   
+          <div slot="start">
+            <img *ngIf="r.c_image" class="card-image image-small" src="{{ r.c_image }}">        
+            {{ r.c_text }}
+            <div id="answer-detail-{{i}}" class="answer-detail sm">
+              <div><u>Your Answer:</u> {{ r.userAnswer }}</div>
+              <div *ngIf="!r.isCorrect"><u>Correct Answer:</u> {{ r.correctAnswer }}</div>
+            </div> 
+          </div>
+        </div>          
+      </ion-item-divider>
+    </div>
+  </ion-card>
+
+</ion-content>

@@ -1,0 +1,24 @@
+import { Storage } from '@ionic/storage';
+import { AppSettings } from '../../models/appsettings';
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+export class QuizClass {
+
+  constructor() {
+  }
+
+  setFontSize(content: string, img: string) {
+    if ((img && img !== '') || content.length > 115) return 'sm3';
+    else if (content.length > 95) return 'sm2';
+    else if (content.length > 55) return 'sm1';
+    else return '';
+  }
+
+  setQcardSize(switchtext: number) {
+    return (switchtext === 1) ? 'qcardswitch' : '';
+  }
+}

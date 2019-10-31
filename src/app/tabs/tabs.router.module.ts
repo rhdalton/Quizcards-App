@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { IonTabs } from '@ionic/angular';
 
 const routes: Routes = [
   {
@@ -8,42 +9,26 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       {
-        path: 'tab1',
-        children: [
-          {
-            path: '',
-            loadChildren: '../tab1/tab1.module#Tab1PageModule'
-          }
-        ]
+        path: 'tabhome',
+        loadChildren: '../tabhome/tabhome.module#TabhomeModule'
       },
       {
-        path: 'tab2',
-        children: [
-          {
-            path: '',
-            loadChildren: '../tab2/tab2.module#Tab2PageModule'
-          }
-        ]
+        path: 'tabmanage',
+        loadChildren: '../tabmanage/tabmanage.module#TabmanagePageModule'
       },
       {
-        path: 'tab3',
-        children: [
-          {
-            path: '',
-            loadChildren: '../tab3/tab3.module#Tab3PageModule'
-          }
-        ]
+        path: 'tabaccount',
+        loadChildren: '../tabaccount/tabaccount.module#TabaccountPageModule'
       },
       {
-        path: '',
-        redirectTo: '/tabs/tab1',
-        pathMatch: 'full'
+        path: 'tabmore',
+        loadChildren: '../tabmore/tabmore.module#TabmorePageModule'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/tabs/tab1',
+    redirectTo: '/tabs/tabhome',
     pathMatch: 'full'
   }
 ];
@@ -52,6 +37,9 @@ const routes: Routes = [
   imports: [
     RouterModule.forChild(routes)
   ],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [
+    IonTabs
+  ]
 })
 export class TabsPageRoutingModule {}

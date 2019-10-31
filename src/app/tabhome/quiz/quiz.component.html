@@ -1,0 +1,75 @@
+
+<ion-content>
+  <div *ngIf="Card; else quizResult">
+    <ion-card class="qcard quizcard {{Quiz.quizcolor}}" [class.quizcard-typein]="quizType=='typein'" [@animateCard]="_cardCountSwipe">
+      <div class="quiz-header qctext">
+        <div class="right">CARD {{currentcard}} / {{totalcards}}</div>
+        {{Quiz.quizname}}
+      </div>
+      <ion-card-content>
+        <div class="card-text {{fontsize}} {{qcardsize}}">
+          <div *ngIf="Quiz.switchtext==0; else switch">            
+            <div [hidden]="Quiz.ttsaudio==1">
+              <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image" src="{{Card.c_image}}" />
+              {{Card.c_text}}
+              <div [hidden]="!Card.c_subtext" class="sm card-subtext">
+                {{Card.c_subtext}}
+              </div>
+            </div>
+            <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
+              <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audioActive" (click)="playAudio(300)"></ion-icon>
+            </div>
+          </div>
+          <ng-template #switch>
+            {{Card.c_study}}
+            <div [hidden]="!Card.c_substudy" class="sm card-subtext">
+              {{Card.c_substudy}}
+            </div>
+          </ng-template>
+        </div>
+        <div class="card-options">
+          <div *ngIf="isPro && Quiz.quizTimer > 0" class="timercircle {{ Quiz.quizcolor }}-bg">
+            <div id="timer" class="timer qctext">{{timer}}</div>
+            <svg width="42" height="42" xmlns="http://www.w3.org/2000/svg">
+              <g>
+                <circle 
+                  id="circle" 
+                  class="circle_animation" 
+                  r="13" cy="26" cx="26" 
+                  stroke-width="3"
+                  [attr.stroke]="strokecolor"
+                  fill="transparent"
+                  [ngStyle]="{'stroke-dashoffset': dashoffset, 'transition': dashtransition}" />
+              </g>
+            </svg>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="qcard quizcard quiz-answer {{Quiz.quizcolor}}" [@animateCard]="_cardCountSwipe">
+      <div *ngIf="quizType=='multi'">
+        <div *ngFor="let a of multiAnswerList; index as i" (click)="chooseAnswer(i, $event)" class="multi-answer bt" id="multi-{{i}}">
+            <ion-radio-group><ion-radio class="qctext" disabled></ion-radio></ion-radio-group><span dir="ltr">{{a}}</span>
+        </div>
+      </div>
+      <div *ngIf="quizType=='typein'" class="card-typein">
+        <form #f="ngForm" (ngSubmit)="checkAnswer(f.value)">
+          <button></button>
+          <textarea [(ngModel)]="typeinAnswer" (focus)="focusInput($event)" name="typeinAnswer" class="form-control {{typeinCssResult}}" placeholder="Type answer here"></textarea>   
+        </form>
+      </div>
+    </ion-card>
+  </div>
+
+  <ng-template #quizResult>
+    <app-quizresult *ngIf="quizFinished" 
+      [quizId]="Quiz.id" 
+      [quizType]="quizType" 
+      [totalcards]="totalcards" 
+      [totalCorrect]="totalCorrect" 
+      [quizResults]="quizResults"
+      [reload]="reload"></app-quizresult>    
+  </ng-template>
+</ion-content>
+    

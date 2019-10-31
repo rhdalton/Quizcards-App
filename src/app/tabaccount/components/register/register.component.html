@@ -1,0 +1,56 @@
+<ion-content>
+<ion-card class="qcard quiz-color-white">
+  <ion-item-divider class="header-text">
+    Register QuizCards Account:
+  </ion-item-divider>
+  <ion-item-divider>
+    <div class="ion-item-divider-inner">
+
+      <div *ngIf="alertMessage!=''" class="alert alert-error">{{alertMessage}}</div>
+
+      <form #f="ngForm" (ngSubmit)="doRegister(f.value)">
+        <div class="form-group">
+          
+          <input 
+            (ngModel)="newUser.displayname"
+            name="displayname"
+            class="input-text bgfocus"
+            id="displayname"
+            type="text"
+            placeholder="User Name"
+            maxlength="26"
+            (blur)="checkUsername($event)">
+          <div *ngIf="usernameError!=''" class="sm lh-3" style="color:red;"><span dir="ltr" [innerHTML]="usernameError"></span></div>
+          <div *ngIf="usernameValid" class="sm" style="color:green;"><span dir="ltr">Username is OK.</span></div>
+          <div class="sm lh-3"><span dir="ltr">This is the name other users will see. Spaces allowed & cannot be changed later.</span></div>
+        </div>
+
+        <div class="form-group">
+          <input 
+            (ngModel)="newUser.acc_email" 
+            name="acc_email" 
+            class="input-text bgfocus"
+            id="acc_email" 
+            type="email" 
+            placeholder="Email Address">
+          <div class="sm lh-3"><span dir="ltr">Make sure your Email address is correct. It's the only way to recover a forgotten password.</span></div>
+        </div>
+
+        <div class="form-group">
+          <input (ngModel)="newUser.acc_password" name="acc_password" class="input-text bgfocus" id="acc_password" type="password" placeholder="Password">
+        </div>
+          <div class="form-group">
+          <input (ngModel)="newUser.acc_repeatpwd" name="acc_repeatpwd" class="input-text bgfocus" id="acc_repeatpwd" type="password" placeholder="Repeat Password">
+        </div>
+
+        <div class="form-group">
+          <input [(ngModel)]="newUser.acc_terms" name="acc_terms" class="" id="acc_terms" type="checkbox" checked="checked" style="width:20px;display:inline-block;">
+          <label for="acc_terms" style="display:inline-block;font-weight:400;"><span dir="ltr">Agree to <a href="https://quizcardsapp.com/terms">Account terms</a>.</span></label>
+        </div>
+
+        <ion-button type="submit" expand="block">Create Account</ion-button>
+      </form>
+    </div>
+  </ion-item-divider>
+</ion-card>
+</ion-content>

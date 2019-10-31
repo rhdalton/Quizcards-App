@@ -1,0 +1,63 @@
+<ion-content *ngIf="accountPageLoaded">
+  <ion-card *ngIf="User; else loginPage" class="qcard quiz-color-white">
+    <ion-item-divider class="header-text">
+      <div class="ion-item-divider-inner" style="margin-top:10px">
+        <div class="user-circle">{{User.displayName[0]}}</div>
+        <span dir="ltr"><b>{{User.displayName}}</b></span>
+        <div class="sm" dir="ltr">Member since {{joinTime}}</div>
+        <div *ngIf="User.userStatus=='pro'" class="sm"><ion-badge color="tertiary">Pro Account</ion-badge></div>
+        <div class="badge-row badge-row-account">
+          <div *ngFor="let b of userBadges" class="badge bs rank{{b.maxrank}}bg rank-{{b.rank}} user-has"><img src="assets/badges/{{b.image}}.png"></div>
+        </div>
+      </div>
+    </ion-item-divider>
+    <div *ngIf="!_app.syncNotice" class="alert alert-notify sm lh-5"><p (click)="dismissSyncNotice()" style="margin:0;float:right;font-weight:700;font-size:24px;">x</p>
+      <span dir="ltr">Did you know: You can create flashcards on your computer and sync them to your device.
+        Go to www.quizcardsapp.com to start now.</span>
+    </div>
+
+    <ion-item-divider>
+      <div routerLink="/tabs/tabaccount/usercloud" class="ion-item-divider-inner account-service">
+        <img class="cloud" src="assets/icon/cloud.svg" >
+        <div>Manage Cloud Backups
+          <div class="sm" dir="ltr">Download your cloud backups onto any device.</div>
+        </div>
+      </div>
+    </ion-item-divider>
+    <ion-item-divider>
+      <div routerLink="/tabs/tabaccount/badges" class="ion-item-divider-inner account-service">
+        <img class="" src="assets/icon/badge.svg">
+        <div>Achievements & Badges
+          <div class="sm" dir="ltr">Track your study progress and earn QuizCard badges for the effort you put into studying!</div>
+        </div>
+      </div>
+    </ion-item-divider>
+    <ion-item-divider>
+      <div routerLink="/tabs/tabmore/sharecode" class="ion-item-divider-inner account-service">
+        <img class="" src="assets/icon/enter-code.svg">
+        <div>Enter a Share Code
+          <div class="sm" dir="ltr">Got a Share Code from a friend? Enter it here and download their QuizCard set!</div>
+        </div>
+      </div>
+    </ion-item-divider>
+    <ion-item-divider *ngIf="!isPro">
+      <div routerLink="/tabs/tabaccount/upgradepro" class="ion-item-divider-inner account-service">
+        <img class="" src="assets/icon/upgrade.svg">
+        <div>
+          Upgrade to QuizCards Pro
+          <div class="sm" dir="ltr">Looking for increased limits, advanced features, or just want to support this app? Upgrade your account now.</div>
+        </div>
+      </div>
+    </ion-item-divider>
+    <ion-item-divider>
+      <div (click)="logOut()" class="ion-item-divider-inner account-service">
+        <img class="" src="assets/icon/logout.svg"><div>Log out</div>
+      </div>
+    </ion-item-divider>
+
+  </ion-card>
+
+  <ng-template #loginPage>
+    <app-login></app-login>
+  </ng-template>
+</ion-content>

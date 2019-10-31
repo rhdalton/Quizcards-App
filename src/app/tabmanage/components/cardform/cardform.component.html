@@ -1,0 +1,44 @@
+
+<ion-content>
+  <ion-card *ngIf="Card" class="qcard quiz-color-white">
+    <ion-card-content>
+      <div class="card-header" dir="ltr">{{cardheader}}:</div>
+      <div class="upload-image" (click)="showImageActionSheet()"></div>            
+
+      <div *ngIf="Card.c_image" style="position:relative;text-align: center;width:100%;">
+        <div class="remove-image" (click)="removeImage()"><img src="assets/icon/redx.svg"></div>
+        <img class="card-image" src="{{ Card.c_image }}">
+      </div>
+      <form #f="ngForm" (ngSubmit)="save(f)">
+        <div class="form-group">
+          <textarea [(ngModel)]="Card.c_text" name="c_text" rows="1" class="input-textarea qcard-textarea bgfocus" id="c_text" placeholder="Card text"></textarea>
+        </div>
+
+        <div class="form-group">
+          <textarea [(ngModel)]="Card.c_correct" name="c_correct" rows="1" class="input-textarea qcard-textarea-ans bgfocus form-control" id="c_correct" placeholder="Card answer"></textarea>
+        </div>
+
+        <div *ngIf="isPro" (click)="toggleAdvFields()" class="form-group" style="margin-top:-15px">
+          <ion-icon [attr.name]="advFields?'arrow-dropdown':'arrow-dropright'" style="font-size:24px;vertical-align:top"></ion-icon>Advanced Fields
+        </div>
+
+        <div [hidden]="!advFields">
+
+          <div class="form-group">
+            <input [(ngModel)]="Card.c_subtext" name="c_subtext" type="text" class="input-text bgfocus" id="c_subtext" placeholder="Card sub text...">
+            <div class="sm">Optional field for phonetic spelling or additional info.</div>
+          </div>
+
+          <div class="form-group">
+            <textarea [(ngModel)]="Card.c_substudy" name="c_substudy" rows="1" class="input-text bgfocus" id="c_substudy" placeholder="Card answer notes..."></textarea>
+            <div class="sm">Optional field for answer notes. This info is not included in Quiz modes.</div>
+          </div>
+
+        </div>
+        <div *ngIf="errorMsg" class="danger">{{errorMsg}}</div>
+        <ion-button type="submit" expand="block">Save Card</ion-button>
+      </form>
+
+    </ion-card-content>
+  </ion-card>
+</ion-content>

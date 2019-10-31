@@ -1,0 +1,37 @@
+
+<div class="com-dl-top">
+  <div (click)="modal.dismiss()" class="right">Close</div>
+  UPLOAD:
+</div>
+<div class="com-dl-title">
+  {{ Quiz.quizname }}
+</div>
+<div class="com-dl-details">
+  Please select the best category for your QuizCard set, and give a short description of what your cards are about.
+</div>
+<div *ngIf="alertMessage" class="alert alert-error">{{ alertMessage }}</div>
+<form #f="ngForm" (ngSubmit)="uploadQuiz(f.value)">
+  <div class="form-group">
+    <select [(ngModel)]="current_cat" (change)="changeCat()" name="current_cat" class="input-select bgfocus">
+      <option value="">-- Select Category</option>
+      <option *ngFor="let c of categoryList" value="{{ c }}">{{ c }}</option>
+    </select>
+  </div>
+  <div *ngIf="current_cat !== ''" class="form-group">
+    <select [(ngModel)]="current_subcat" name="current_subcat" class="input-select bgfocus" style="width:100%;">
+      <option value="">-- Select Subcategory</option>
+      <option *ngFor="let s of subcat" value="{{ s }}">{{ s }}</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <textarea [(ngModel)]="quizdesc" name="quizdesc"  class="input-textarea bgfocus" placeholder="Short description"></textarea>
+  </div>
+  
+  <div class="sm">
+    By uploading flashcards to the Community, you agree to follow the guidelines on <a href="https://quizcardsapp.com/terms#user-content">User content</a>.
+  </div>
+  
+  <div style="width:100%;text-align:center;margin-top:10px">
+    <ion-button type="submit" style="font-size:16px">Upload</ion-button>
+  </div>
+</form> 

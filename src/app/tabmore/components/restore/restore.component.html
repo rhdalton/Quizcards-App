@@ -1,0 +1,32 @@
+
+<ion-content>
+  <ion-card *ngIf="Quizzes" class="qcard quiz-color-white">
+    <ion-item-divider class="header-text">
+      <div class="ion-item-divider-inner" dir="ltr">
+          Restore Archived Card Set:
+      </div>        
+    </ion-item-divider>
+    <ion-item-divider>
+      <div class="ion-item-divider-inner sm" dir="ltr">
+        Select an archived card set to restore.
+      </div>
+    </ion-item-divider>
+  
+  </ion-card>
+
+  <ion-card *ngIf="Quizzes && Quizzes.length==0" class="alert-notify">
+    <ion-card-content dir="ltr">
+      No archived card sets found.
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngFor="let q of Quizzes" (click)="restore(q.id)" class="qcard {{ q.quizcolor }}">
+    <ion-card-content>
+      {{ q.quizname }}
+      <span class="card-count" dir="ltr">({{q.cardcount}} Card<span *ngIf="q.cardcount!=1">s</span>)</span>
+    </ion-card-content>    
+  </ion-card>
+
+</ion-content>
+  
+  

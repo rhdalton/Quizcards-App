@@ -1,0 +1,21 @@
+
+<ion-item-divider>
+  <div class="ion-item-divider-inner" dir="ltr">
+    Upload a Card Set to the QuizCard Community
+
+    Select a set to upload:
+
+    <div *ngIf="!User" class="alert alert-notify" style="margin-top:20px" dir="ltr">      
+      You must log in to your QuizCards account to upload to the community.
+    </div>
+  </div>
+</ion-item-divider>
+
+<div *ngIf="User">
+  <ion-card *ngFor="let q of Quizzes" (click)="uploadQuiz(q)" class="qcard {{ q.quizcolor }}">
+    <ion-card-content>
+      {{ q.quizname }}
+      <span class="card-count" dir="ltr">({{q.cardcount}} Card<span [hidden]="q.cardcount==1">s</span>)</span>
+    </ion-card-content>
+  </ion-card>
+</div>

@@ -1,0 +1,51 @@
+
+<ion-content>
+  <ion-card *ngIf="Quiz" class="qcard quiz-color-white">
+    <ion-item-divider class="header-text" dir="ltr">
+      Share a QuizCard Set:
+    </ion-item-divider>
+    <ion-item-divider>
+      <div class="ion-item-divider-inner" dir="ltr">
+        Click below to generate a share code for this set. Give the code to your 
+        friends for them to download your cards.
+        <div class="sm" dir="ltr">Your friends must have the QuizCards app on their device to download.</div>
+      </div>
+    </ion-item-divider>
+  
+  </ion-card>
+
+  <ion-card *ngIf="Quiz" [ngClass]="Quiz.quizcolor" class="qcard">
+    <ion-card-content>
+      <div class="qctext sm" dir="ltr"><strong>SHARING CARDSET:</strong></div>      
+      {{Quiz.quizname}}
+      <div class="card-count" dir="ltr">{{Quiz.cardcount}} Card<span *ngIf="Quiz.cardcount!=1">s</span></div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="Quiz && !shareComplete" class="qcard quiz-color-white">
+    <ion-item-divider>
+      <div class="ion-item-divider-inner">
+        <ion-button (click)="shareToFriends()" expand="block">Generate Share Code</ion-button>
+      </div>
+    </ion-item-divider>
+
+    <ion-item-divider [hidden]="true">
+      <div class="ion-item-divider-inner" dir="ltr">
+        Do you know the QuizCards Username of the friend you want to send this cardset? Send it directly to them
+        by entering their Username below:
+      </div>
+    </ion-item-divider>
+  </ion-card>
+
+  <ion-card *ngIf="Quiz && shareComplete" class="qcard quiz-color-white">
+    <ion-card-content style="text-align:center;">
+      <div>Share code generated!</div>
+      <input id="sharecode" type="text" value="{{ shareCode | uppercase }}" readonly /> <img (click)="copytoclipboard()" class="copycode" src="assets/icon/copycode.svg" />
+      <br /><br />
+      <div class="sm">Note: This code will be active for 2 days (48 hours).</div>        
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+  
+  

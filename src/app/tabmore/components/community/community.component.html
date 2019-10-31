@@ -1,0 +1,25 @@
+<ion-content>
+  <ion-segment (ionChange)="segmentChanged($event)">
+    <ion-segment-button value="browse" checked>
+      <ion-label>Browse</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="upload">
+      <ion-label>Upload</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="favorites">
+      <ion-label>Favorites</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <div *ngIf="tab=='browse'">
+    <app-com-home></app-com-home>
+  </div>
+
+  <div *ngIf="tab=='upload'">
+    <app-com-upload></app-com-upload>
+  </div>
+
+  <div *ngIf="tab=='favorites'">
+    <app-com-favorites></app-com-favorites>
+  </div>
+</ion-content>

@@ -1,0 +1,24 @@
+
+<ion-content>
+  <ion-card class="qcard quiz-color-white">
+    <ion-item-divider class="header-text" dir="ltr">
+      Enter Share Code:
+    </ion-item-divider>
+    <ion-item-divider>
+      <div class="ion-item-divider-inner" dir="ltr">
+        Got a share code from a friend? Enter it below to download their QuizCard set!
+        <form #f="ngForm" (ngSubmit)="submitCode(f.value)">
+          <div class="form-group" style="text-align:center">
+            <input #sharecode="ngModel" (ngModel)="sharecode" name="sharecode" type="text" class="input-text bgfocus" id="sharecode" placeholder="Enter code...">
+            <div class="sm" dir="ltr">Code is not case sensitive.</div>
+          </div>
+          <ion-button type="submit" expand="block">Download</ion-button>
+        </form>
+      </div>
+    </ion-item-divider>
+  
+  </ion-card>
+
+</ion-content>
+    
+    

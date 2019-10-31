@@ -1,0 +1,24 @@
+
+<ion-content>
+  <ion-card class="qcard quiz-color-white">
+    <ion-item-divider class="header-text">
+      <div class="ion-item-divider-inner" dir="ltr">
+        QuizCards Achievements:
+        <div class="sm" dir="ltr">Earn badges for completing various acheivements by studying with this app.</div>
+      </div>
+    </ion-item-divider>
+    <ion-item-divider *ngIf="userAchievementData">
+      <div class="ion-item-divider-inner" dir="ltr">
+        <div *ngFor="let a of achievementsList" (click)="achieveDetails(a.id)" class="badge-row">
+          <div class="right">
+            <div *ngFor="let b of a.badges; let i = index" class="badge bm rank{{a.maxrank}}bg rank-{{i+1}}" [ngClass]="{'user-has':a.rank>i}"><img src="assets/badges/{{a.image}}.png"></div>
+          </div>
+          <span class="title-rank-{{a.rank}}">{{a.title}}</span>
+        </div>
+        <div class="sm" dir="ltr"><br >
+          Note: Achievements & Badges are a way to encourage you to study. It is not a competition to collect them as fast as you can. Just study a little every day and you'll eventually reach your goals!
+        </div>
+      </div>      
+    </ion-item-divider>    
+  </ion-card>
+</ion-content>

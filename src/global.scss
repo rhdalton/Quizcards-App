@@ -9,3 +9,987 @@
 @import '~@ionic/angular/css/text-alignment.css';
 @import '~@ionic/angular/css/text-transformation.css';
 @import '~@ionic/angular/css/flex-utils.css';
+
+$default-color: #444;
+$light-color:#777;
+$card-white-color:#9f9f9f;
+$card-blue-color:#479be2;
+$card-red-color:#ef6969;
+$card-green-color:#47ca57;
+$card-yellow-color:#c6b71f;
+$card-purple-color:#c46fff;
+$card-orange-color:#ff992d;
+
+$correct-color: #dcffde;
+$incorrect-color:#ffe8e8;
+
+$theme-blue: #1c6fc4;
+$theme-blue-text: #bddeff;
+
+ion-app * {
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); 
+  -webkit-tap-highlight-color: transparent;
+}
+
+ion-tab-bar {
+  -webkit-box-shadow: 0px 2px 3px 0px rgba(156,156,156,1);
+  -moz-box-shadow: 0px 2px 3px 0px rgba(156,156,156,1);
+  box-shadow: 0px 2px 3px 0px rgba(156,156,156,1);
+  height:50px;
+  background:$theme-blue;
+
+  ion-tab-button {
+    background:$theme-blue;
+    font-size:11px;
+    color:#95c9ff;
+    &.tab-selected {
+      background:lighten( $theme-blue, 10% );
+      ion-label, ion-icon {
+        color:#fff;
+      }
+    }
+  }
+}
+.content-header {
+  background:$theme-blue;
+  height:50px;
+  color:$theme-blue-text;
+  -webkit-box-shadow: 0px 2px 3px 0px rgba(156,156,156,1);
+  -moz-box-shadow: 0px 2px 3px 0px rgba(156,156,156,1);
+  box-shadow: 0px 2px 3px 0px rgba(156,156,156,1);
+  padding:0 10px;
+  line-height:45px;
+  margin-bottom:10px;
+  font-weight:600;
+  div.right {
+    font-weight:400;
+    font-size:12px;
+  }
+  img {
+    width:20px;
+    vertical-align: text-bottom;
+    color:#fff;
+    opacity:.4;
+    margin-right:4px;
+  }
+}
+
+ion-item-divider {
+  min-height:40px;
+  font-weight:400;
+  color:$default-color;
+  font-size:16px;
+  &.noborder {
+    border:none;
+  }
+  .ion-item-divider-inner {
+    width:100%;
+  }
+}
+
+.ion-item-inner {
+  padding:6px 0;
+  line-height:1.3em;
+  font-size:16px;
+}
+
+/************************************
+/** UTILITY CLASSES
+/************************************/
+.sm {
+  font-size:13px;
+  color:$light-color;
+  font-weight:400;
+  line-height:1.3em;
+}
+.lh-3 {line-height:1.3em;}
+.lh-5 {line-height:1.5em;}
+.danger {
+  color:#e40000;
+  font-size:14px;
+  font-weight:400;
+}
+.noformat {
+  --padding-start:0;
+  --min-height:0;
+  padding:0;
+  min-height:0;
+}
+.right {
+  float:right;
+}
+
+.color-white { color: $card-white-color; }
+.color-blue { color: $card-white-color; }
+.color-red { color: $card-white-color; }
+.color-green { color: $card-white-color; }
+.color-yellow { color: $card-white-color; }
+.color-purple { color: $card-white-color; }
+.color-orange { color: $card-white-color; }
+
+.quiz-color-white {
+  border: 1px solid lighten( $card-white-color, 20%);
+  background:#ffffff;
+  .qctext {
+    color:$card-white-color;
+  }
+  .bt {
+    border-top: 1px solid lighten( $card-white-color, 20%);
+  }
+}
+
+.quiz-color-blue {
+  background:lighten( $card-blue-color, 27%);
+  border: 1px solid lighten( $card-blue-color, 15%);
+  .qctext {
+    color:$card-blue-color;
+  }
+  .bt {
+    border-top: 1px solid lighten( $card-blue-color, 15%);
+  }
+}
+
+.quiz-color-red {
+  background:lighten( $card-red-color, 20%);
+  border: 1px solid lighten( $card-red-color, 10%);
+  .qctext {
+    color:$card-red-color;
+  }
+  .bt {
+    border-top: 1px solid lighten( $card-red-color, 10%);
+  }
+}
+
+.quiz-color-green {
+  background:lighten( $card-green-color, 30%);
+  border: 1px solid lighten( $card-green-color, 15%);
+  .qctext {
+    color:$card-green-color;
+  }
+  .bt {
+    border-top: 1px solid lighten( $card-green-color, 15%);
+  }
+}
+
+.quiz-color-yellow {
+  background:lighten( $card-yellow-color, 36%);
+  border: 1px solid lighten( $card-yellow-color, 5%);
+  .qctext {
+    color:$card-yellow-color;
+  }
+  .bt {
+    border-top: 1px solid lighten( $card-yellow-color, 5%);
+  }
+}
+
+.quiz-color-purple {
+  background:lighten( $card-purple-color, 20%);
+  border: 1px solid lighten( $card-purple-color, 10%);
+  .qctext {
+    color:$card-purple-color;
+  }
+  .bt {
+    border-top: 1px solid lighten( $card-purple-color, 10%);
+  }
+}
+
+.quiz-color-orange {
+  background:lighten( $card-orange-color, 25%);
+  border: 1px solid lighten( $card-orange-color, 15%);
+  .qctext {
+    color:$card-orange-color;
+  }
+  .bt {
+    border-top: 1px solid lighten( $card-orange-color, 10%);
+  }
+}
+
+.card-content-md {
+  -webkit-padding-start: 12px;
+  padding-inline-start: 12px;
+  -webkit-padding-end: 12px;
+  padding-inline-end: 12px;
+  padding:12px;
+}
+
+ion-item-divider {
+  padding:10px 12px;
+  min-height:0;
+  line-height:1.4em;
+  &.header-text {
+    font-size:18px;
+    font-weight:600;
+  }
+}
+
+ion-button {
+  font-size:16px;
+  &.small {
+    font-size:11px;
+  }
+}
+
+.qcard {
+  font-weight:600;
+  color: $default-color;
+  border-radius:0;
+  text-align: left;
+
+  .std-text {
+    font-size:14px;
+    font-weight:400;
+  }
+
+  &.std-card {
+    .card-content-md {
+      min-height:90px;
+      padding-bottom:34px;
+    }    
+  }
+  &.cardlist {    
+    font-weight:400;
+    .card-content-md {
+      font-size:16px;
+      padding:8px 10px;
+    }
+    .card-detail {
+      font-size:14px;
+      margin-top:5px;
+      padding-top:6px;
+      border-top:1px solid #ccc;
+    }
+    &.compact-view {
+      height:38px;
+      overflow:hidden;
+    }
+  }
+  .card-content-md {
+    font-size:18px;    
+  }
+
+  .card-count {
+    font-size:13px;
+    font-weight:400;
+  }
+  .card-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 15px;
+    text-align:right;
+    font-size:14px;
+    .qctext {
+      padding:2px 8px 0px 18px;
+      display:inline-block;
+    }
+    .add-action {
+      display:inline-block;
+      padding-left:15px;
+    }
+  }
+
+  .edit-card {
+    line-height:1;
+    display:inline-block;
+    padding:15px 20px;
+    margin-top:-5px;
+    background: url('assets/icon/edit.svg') right no-repeat;
+    background-size: 22px;
+  }
+
+  .set-settings {
+    margin:-5px -5px 0 0;
+    padding:5px;
+    img {
+      width:20px;
+    }
+  }
+
+  .card-image {
+    max-height:200px;  
+    object-fit: contain;
+    &.image-small {
+      width:auto;
+      max-height:80px;
+      margin-right:6px;
+    }
+  }
+
+  .upload-image {
+    z-index:100;
+    position:absolute;
+    top:8px;
+    right:15px;
+    width:40px;
+    height:30px;
+    background:url('assets/icon/uploadimage.svg') right no-repeat;
+    background-size: 30px;
+  }
+
+  .remove-image {
+    z-index:100;
+    position:absolute;
+    bottom:4px;
+    right:3px;
+    width:40px;
+    height:30px;
+    background:url('assets/icon/uploadimage.svg') right no-repeat;
+    background-size: 30px;
+    img {
+      width: 16px;
+      position: absolute;
+      top:7px;
+      right:6px;
+    }
+  }
+
+  /** Study/Quiz Qcard styles **/
+  &.quizcard {
+    font-weight:400;
+
+    .quiz-header {
+      font-weight:600;
+      text-transform: uppercase;
+      padding:8px 12px 0;
+      margin-bottom:-3px;
+    }
+    .card-text {
+      min-height:38vh;
+      font-size:32px;
+      &.qcardswitch {
+        min-height:28vh;
+      }
+      &.sm3 {
+        font-size:16px;
+      }
+      &.sm2 {
+        font-size:20px;
+      }
+      &.sm1 {
+        font-size:24px;
+      }
+    }
+    &.quizcard-typein .card-text {
+      min-height:46vh;
+    }
+    .card-subtext {
+      font-size:14px;
+    }
+    .card-answer {
+      min-height:25vh;
+      padding:10px 0 0;
+      font-size:18px;
+      &.qcardswitch {
+        min-height:35vh;
+      }
+    }
+    &.study-nav {
+      &.sc-ion-card-md-h {
+        margin-top:0;
+      }
+      span {
+        padding:5px 10px;
+        line-height:1em;
+      }      
+    }
+    .audio-large {
+      font-size:46px;
+      color:#999;
+    }
+    .audio-small {
+      font-size:28px;
+      color:#999;
+    }
+    .audio-large-active,
+    .audio-small-active {
+      color:#007bff;
+    }
+
+    .multi-answer {
+      padding:5px 10px;
+      font-size:16px;
+      min-height:50px;
+      display:flex;
+
+      &.correct-answer {
+        background-color:$correct-color;
+      }
+      &.incorrect-answer {
+        background-color: $incorrect-color;
+      }
+
+      ion-radio-group {
+            
+        margin: auto 0;
+        ion-radio {
+          width:20px;
+          height:20px; 
+        }
+      }
+      span {
+        margin: auto 0;
+        line-height:1.3em;
+      }
+    }
+
+    .card-typein {
+      padding:10px;
+      textarea {
+        width:calc(100% - 40px);
+        border:none;
+        height:100px;
+        padding:5px;
+        font-size:16px;
+        &.correct-answer {
+          background-color: $correct-color;
+        }
+        &.incorrect-answer {
+          background-color: $incorrect-color;
+        }
+      }
+      button {
+        float:right;
+        padding:16px 20px;
+        background:url('assets/icon/checkanswer.svg') right no-repeat;
+        background-size:32px; 
+      }
+    }
+
+    .card-options {
+      position: absolute;
+      bottom:0;
+      left:0;
+    }
+  }
+  //** quiz results page **/
+
+  .result-detail {
+    &.correct-answer {
+      background: $correct-color;
+      ion-icon {
+        color: $card-green-color;
+      }
+    }
+    &.incorrect-answer {
+      background: $incorrect-color;
+      ion-icon {
+        color: $card-red-color;
+      }
+    }
+    ion-icon {
+      margin-top:0;
+      margin-bottom:0;
+    }
+    .answer-detail {
+      display:none;
+    }
+  }
+  .circular-chart {
+    display: block;
+    margin: 0 auto 10px;
+    max-width: 35%;
+  }  
+  .circle-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 3.8;
+  }  
+  .circle {
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+  }
+  .circular-chart .circle {
+    stroke: #3c9ee5;
+  }
+  @keyframes progress {
+    0% {
+      stroke-dasharray: 0 100;
+    }
+  }
+  .percentage {
+    fill: #666;
+    font-family: sans-serif;
+    font-size: 0.5em;
+    text-anchor: middle;
+  }
+  
+  // ** qcard account pages **/
+  .account-service {
+    >div, img {
+      display:inline-block;
+    }
+    >div {
+      width: calc(100% - 33px);
+    }
+    img {
+      width:23px;
+      margin-right:10px;
+      display:inline-block;      
+      vertical-align: top;
+      &.cloud {
+        width:26px;
+        margin-right:7px;
+      }
+    }
+  }
+  // ** cloud card sets **/
+  .download-set {
+    display:inline-block;
+    padding:15px;
+    background:url('assets/icon/cloud-download.svg') top no-repeat;
+    background-size: 26px;
+    margin-right:14px;
+  }
+  .delete-set {
+    display:inline-block;
+    padding:15px;
+    background:url('assets/icon/delete-from-cloud.svg') top no-repeat;
+    background-size: 25px;
+  }
+  // ** more tab **/
+  &.app-settings {
+    ion-toggle {
+      padding-top:5px;
+      padding-bottom:5px;
+      -webkit-margin-start: 0px;
+      margin-inline-start: 0px;
+    }
+  }
+  #sharecode {
+    width:150px;
+    padding:5px;
+    text-align:center;
+    display:inline-block;
+  }
+  .copycode {
+    width:30px;
+    vertical-align: middle;
+    margin-left: 10px;
+    display:inline-block;
+  }
+  
+  /** COMMUNITY CARDS **/
+  &.com-card {
+    .qctext {
+      font-size:14px;
+    }
+    .com-card-desc {
+      font-size:14px;
+      font-weight:400;
+      line-height:1.2em;
+      color:#444;
+      max-height:2.2em;
+      overflow:hidden;
+    }
+    .com-card-details {
+      font-weight:400;
+      font-size:13px;
+      margin-top:5px;
+      color:#444;
+    }
+  }
+}
+
+ion-slide {
+  padding:10px;
+  .qcard {
+    width:100%;
+    margin:0;
+  }
+}
+
+.card-view {
+  vertical-align: top;
+  img {
+    width:18px;
+  }
+}
+
+.standard-popover {
+  .popover-content {
+    width:160px;
+    .list-md {
+      padding:0;
+    }
+    ion-item-divider {
+      font-size:18px;
+      padding:12px 10px;
+      img {
+        width:15px;
+        margin-right:5px;
+        margin-left:5px;
+      }
+    }
+  }
+  &.quiz-popover .popover-content {
+    width:180px;
+  }
+}
+
+  /** achievements/badges **/
+  .badge-row {
+    padding:15px 0;
+    border-bottom:1px solid #dbdbdb;
+    font-weight:600;
+    .title-rank-0 {
+      font-weight:400;
+      color:#999;
+    }
+    .title-rank-1 {
+      font-weight:700;
+    }
+    &.badge-row-account {
+      clear:both;
+      border:0;
+      padding:5px 0 0;
+      margin-bottom:-5px
+    }
+    .badge {
+      margin:-4px 0 0 0;
+      display:inline-block;      
+      background-position: top left;
+      background-repeat: no-repeat;
+      
+      &.rank1bg {
+        background: url('assets/badges/1rank.png');
+      }
+      &.rank2bg {
+        background: url('assets/badges/2rank.png');
+      }
+      &.rank3bg {
+        background: url('assets/badges/3rank.png');
+      }
+      &.rank4bg {
+        background: url('assets/badges/4rank.png');
+      }
+      &.bs {
+        width:20px;
+        height:20px;
+        background-size:40px;
+        img { width:20px; }
+        &.rank-2 {
+          background-position: 0 -20px;
+        }
+        &.rank-3 {
+          background-position: 0 -40px;
+        }
+        &.rank-4 {
+          background-position: 0 -60px;
+        }
+        &.user-has {
+          background-position-x: right;
+        }     
+      }
+      
+      &.bm {
+        width:30px;
+        height:30px;
+        background-size:60px;
+        img { width:30px; }
+        &.rank-2 {
+          background-position: 0 -30px;
+        }
+        &.rank-3 {
+          background-position: 0 -60px;
+        }
+        &.rank-4 {
+          background-position: 0 -90px;
+        }
+        &.user-has {
+          background-position-x: right;
+        }     
+      }
+      &.bl {
+        width:50px;
+        height:50px;
+        background-size:100px;
+        img { width:50px; }
+        &.rank-2 {
+          background-position: 0 -50px;
+        }
+        &.rank-3 {
+          background-position: 0 -100px;
+        }
+        &.rank-4 {
+          background-position: 0 -150px;
+        }
+        &.user-has {
+          background-position-x: right;
+        }     
+      } 
+      &.bxl {
+        width:80px;
+        height:80px;
+        background-size:160px;
+        img { width:80px; }
+        &.rank-2 {
+          background-position: 0 -80px;
+        }
+        &.rank-3 {
+          background-position: 0 -160px;
+        }
+        &.rank-4 {
+          background-position: 0 -240px;
+        }
+        &.user-has {
+          background-position-x: right;
+        }     
+      }    
+      &.user-has {
+        background-position-x: right;
+      }
+    }
+  }
+
+/*****************************************
+/** FORMS
+/*****************************************/
+
+form {
+  label {
+    font-size:16px;
+    font-weight:600;
+    display:block;
+    margin-bottom:10px;
+  }
+  .form-group {
+    margin:10px 0 20px;
+    &.bb {
+      padding-bottom:5px;
+      border-bottom:1px solid #e2e2e2;
+    }
+  }
+}
+.input-textarea,
+.input-select,
+.input-text {
+  width:100%;
+  padding:7px 7px 4px 7px;
+  color:$default-color;
+  border-radius: 0;
+  border:0;
+  border-bottom:2px solid #ccc;
+  font-weight:400;
+  background:#f2f2f2;
+
+  &.bgfocus:focus {
+    border-bottom:2px solid #418dff;
+    background-color:#deebff;
+  }
+  &.qcard-textarea {
+    min-height:122px;
+    font-size:18px;
+  }
+  &.qcard-textarea-ans {
+    min-height:94px;
+    font-size:18px;
+  }
+}
+
+ion-modal.download-modal {
+  --height: auto;
+  font-size:14px;
+  color:$default-color;
+
+  &.bottom {
+    align-items: flex-end;
+  }
+  .ion-page {
+    position: relative;
+    display: block;
+    contain: content;
+  }
+  .modal-wrapper.sc-ion-modal-md {
+    --width:90%;
+    --border-radius: 5px;
+    position: absolute;
+    left:5%;
+    top:10%;
+    padding:15px;
+  }
+
+  .com-dl-top {
+    color:#666;
+    padding-bottom:8px;
+    border-bottom:1px solid #bbb;
+  }
+  .com-dl-title {
+    font-size:20px;
+    font-weight:700;
+    margin:10px 0 8px;
+  }
+  .com-dl-desc {
+    color:#666;
+    line-height:1.3em;
+  }
+  .com-dl-meta {
+    margin-top:8px;
+    color:#666;
+  }
+}
+
+ion-radio {
+  margin-right:10px;
+  width:32px;
+  height:32px;
+  display:inline-block;
+  position:relative;
+}
+
+.radio-white {
+  --color:#c6c6c6;
+  --color-checked:#c6c6c6;
+}
+.radio-blue {
+  --color:#008aff;
+  --color-check:#008aff;
+}
+.radio-red {
+  --color:#ec3a3a;
+  --color-checked:#ec3a3a;
+}
+.radio-green {
+  --color:#39da58;
+  --color-checked:#39da58;
+}
+.radio-yellow {
+  --color:#e8e623;
+  --color-checked:#e8e623;
+}
+.radio-purple {
+  --color:#b64dff;
+  --color-checked:#b64dff;
+}
+.radio-orange {
+  --color:#ff9626;
+  --color-checked:#ff9626;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #adadad;
+  opacity: 1; /* Firefox */
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #adadad;
+}
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #adadad;
+}
+
+/*** ALERT COLORS ***/
+.alert {
+  padding:5px 8px;
+  border-radius: 3px;
+}
+
+.alert-notify {
+  border: 1px solid #95d5db;
+  color:#3297a0;
+  background:#d4eff2;
+}
+
+.alert-error {
+  border: 1px solid #dd7171;
+  color:#d14d4d;
+  background:#ffdddd;
+}
+
+/** circle timer ***/
+.timercircle {
+  position: absolute;
+  bottom: -6px;
+  left: -2px;
+  background: transparent;
+  font-size: 13px;
+}
+.timercircle .timer {
+  position: absolute;
+  top: 7px;
+  left: 11px;
+  text-align: center;
+  width: 30px;
+}
+.timercircle svg {
+  transform: rotate(-90deg);
+}
+.circle_animation {
+  stroke-dasharray: 82;
+  stroke-dashoffset: 0;
+}
+
+.user-circle {
+  float: left;
+  width: 50px;
+  height: 50px;
+  background: #3c7ee1;
+  border-radius: 50%;
+  margin: 0 10px 5px 0;
+  font-size: 24px;
+  color:#fff;
+  font-weight:700;
+  text-transform: uppercase;
+  line-height:50px;
+  text-align:center;
+}
+
+ion-router-outlet > .ion-page { 
+  background:#fff;
+  animation: fadeIn 0.4s 1 forwards;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8vh, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+html[dir="rtl"] {
+  .card-actions {
+    left:0;
+    right: auto;
+  }
+  ion-card {
+    text-align:right;
+  }
+  .qcard {
+    text-align:right;
+    .edit-card {
+      background-position: left;
+    }
+
+    .upload-image {
+      left:15px;
+      right: auto;
+      background-position: left;
+    }
+    .account-service {
+      
+      img {
+        margin-left: 10px;
+        margin-right:0;
+        &.cloud {
+          margin-left:7px;
+        }
+      }
+    }
+  }
+  .user-circle {
+    float:right;
+    margin: 0 0 5px 10px;
+  }
+  .right {
+    float:left;
+  }
+  .header-text {
+    text-align:right;
+  }
+  .download-community-popover {
+    text-align:right;
+  }
+}

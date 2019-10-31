@@ -1,0 +1,13 @@
+
+<ion-card *ngFor="let q of Quizzes" (click)="downloadQuizModal(q)" class="qcard com-card {{ q.quizcolor }}">
+  <ion-card-content dir="ltr">
+    <div class="qctext" dir="ltr">{{ q.quizcategory | uppercase }} / {{ q.quizsubcat | uppercase }}</div>
+    {{ q.quizname }}
+    <div class="com-card-desc" dir="ltr">
+      {{ q.quizdesc }}
+    </div>
+    <div class="com-card-details">
+      <strong class="qctext" dir="ltr">{{ q.cardcount }} card<span *ngIf="q.cardcount !== 1">s</span></strong> &bull; Created by <strong class="qctext">{{ q.quizauthor }}</strong>
+    </div>
+  </ion-card-content>
+</ion-card>
