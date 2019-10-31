@@ -11,6 +11,9 @@ log.txt
 *.sublime-workspace
 .vscode/
 npm-debug.log*
+zipalign.exe
+*.keystore
+*.apk
 
 .idea/
 .ionic/
