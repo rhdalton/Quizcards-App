@@ -16,7 +16,7 @@ import { QuizClass } from '../shared/classes/quiz';
 
 export class ScrollWithSwipeConfig extends HammerGestureConfig {
   overrides = {
-      pan: { direction: 6 },
+      // pan: { direction: 30 },
       pinch: { enable: false },
       rotate: { enable: false }
   };

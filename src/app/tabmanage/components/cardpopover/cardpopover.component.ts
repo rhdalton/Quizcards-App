@@ -9,6 +9,9 @@ import { Router } from '@angular/router';
     <ion-item-divider (click)="editCard()">
       <img src="assets/icon/edit.svg"> Edit
     </ion-item-divider>
+    <ion-item-divider (click)="addBefore()">
+      <img src="assets/icon/add.svg"> Add Before
+    </ion-item-divider>
     <ion-item-divider (click)="deleteCardAlert()" lines="none">
         <img src="assets/icon/trashcan.svg"> Delete
     </ion-item-divider>
@@ -33,6 +36,9 @@ export class CardpopoverComponent {
   editCard() {
     this._pop.dismiss();
     this.router.navigate(['/tabs/tabmanage/card', this._quizId, this._cardId]);
+  }
+  addBefore() {
+    this.params.get('addBefore')();
   }
   deleteCardAlert() {
     this._pop.dismiss();

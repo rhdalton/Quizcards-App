@@ -26,7 +26,7 @@
   <ion-card *ngFor="let c of Cards; let i = index" class="qcard cardlist quiz-color-white" [class.compact-view]="Cards.length>0 && Quiz.cardview=='compact-view'">
     <ion-card-content>
       <div class="right">
-        <div (click)="cardOptions($event, c.id)" class="edit-card"></div>
+        <div (click)="cardOptions($event, c.id, i)" class="edit-card"></div>
       </div>
         {{ i + 1 }}. 
         <img *ngIf="c.c_image && Quiz.cardview=='detail-view'" class="card-image image-small" src="{{ c.c_image }}">

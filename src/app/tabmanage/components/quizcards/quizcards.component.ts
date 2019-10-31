@@ -12,6 +12,7 @@ import { CardpopoverComponent } from '../cardpopover/cardpopover.component';
 import { CardsetpopoverComponent } from '../cardsetpopover/cardsetpopover.component';
 import { MergecardsetComponent } from '../mergecardset/mergecardset.component';
 import { NetworkService } from 'src/app/services/network.service';
+import { File } from '@ionic-native/File/ngx';
 
 @Component({
   selector: 'app-quizcards',
@@ -38,7 +39,8 @@ export class QuizcardsComponent implements OnInit {
     private pop: PopoverController,
     private loader: LoadingController,
     private modal: ModalController,
-    private network: NetworkService
+    private network: NetworkService,
+    private File: File
   ) {
     this._quizId = this.route.snapshot.params.quizid;
     this._cardsloaded = false;
@@ -66,7 +68,7 @@ export class QuizcardsComponent implements OnInit {
     this._cardsloaded = true;
   }
 
-  addCard() {
+  addCard(pos: number = null) {
     if (this.Cards.length >= this._limits.cardLimit) {
       let msg = 'You have reached the Personal limit of ' + this._limits.cardLimit + ' cards. Please upgrade to a Pro account to increase the card limit.';
       if (this._isPro) msg = 'Card sets have a limit of ' + this._limits.cardLimit + ' cards to ensure best app performance. Please create a new set.';
@@ -76,12 +78,14 @@ export class QuizcardsComponent implements OnInit {
         buttons: ['OK']
       }).then(a => a.present());
       return;
+    } else if (pos !== null) {
+      this.router.navigate(['/tabs/tabmanage/card', this._quizId, 0, pos]);
     } else {
       this.router.navigate(['/tabs/tabmanage/card', this._quizId]);
     }
   }
 
-  async cardOptions(ev: any, cardId) {
+  async cardOptions(ev: any, cardId, orderId) {
     const popover = await this.pop.create({
       component: CardpopoverComponent,
       event: ev,
@@ -90,7 +94,8 @@ export class QuizcardsComponent implements OnInit {
         popover: this.pop,
         quizId: this._quizId,
         cardId: cardId,
-        deleteCard: () => this.deleteCardAlert(cardId)
+        deleteCard: () => this.deleteCardAlert(cardId),
+        addBefore: () => { this.pop.dismiss(); this.addCard(orderId); }
       },
       cssClass: 'standard-popover'
     });
@@ -145,6 +150,30 @@ export class QuizcardsComponent implements OnInit {
         cardcount: this.Quiz.cardcount
       }
     }).then(m => m.present());
+  }
+
+  async backupToDevice() {
+    let quizJson = {
+      quizname: this.Quiz.quizname,
+      quizcolor: this.Quiz.quizcolor,
+      cards: []
+    }
+
+    for(const c of this.Cards) {
+      const cardJson = {
+        txt: c.c_text,
+        subtxt: c.c_subtext,
+        ans: c.c_correct,
+        study: c.c_study,
+        substudy: c.c_substudy
+      };
+      quizJson.cards.push(cardJson);
+    }
+
+    const quizJsonString = JSON.stringify(quizJson);
+ 
+    var filename = this.Quiz.quizname + ".qcs";
+    this.File.writeFile(this.File.externalApplicationStorageDirectory, filename, quizJsonString, {replace: true}) ; 
   }
 
   async backupToCloud() {

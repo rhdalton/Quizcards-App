@@ -23,7 +23,7 @@
         </div>
 
         <div class="form-group bb">
-          <ion-item-divider class="noborder" no-padding>
+          <ion-item-divider class="noborder ion-no-padding">
             <ion-toggle [(ngModel)]="formFields.switchtext" name="switchtext" slot="end"></ion-toggle>
             Switch Text & Answer
           </ion-item-divider>
@@ -37,11 +37,11 @@
 
         <div [hidden]="!_moreoptions">
           <div class="form-group">
-            <ion-item-divider no-padding>
+            <ion-item-divider class="ion-no-padding">
               <ion-toggle [(ngModel)]="formFields.studyorder" name="studyShuffle" slot="end"></ion-toggle>
               Shuffle Study card order
             </ion-item-divider>
-            <ion-item-divider no-padding>
+            <ion-item-divider class="ion-no-padding">
               <ion-toggle [(ngModel)]="formFields.quizorder" name="quizShuffle" slot="end"></ion-toggle>
               Shuffle Quiz card order
             </ion-item-divider>
@@ -50,7 +50,7 @@
           <div class="form-group">
             <label dir="ltr">Quiz Timer:</label>
             <div [hidden]="!isPro">
-              <ion-range [(ngModel)]="Quiz.quizTimer" name="quizTimer" min="0" max="30" pin="true" step="2" snaps="true" no-padding>
+              <ion-range [(ngModel)]="Quiz.quizTimer" name="quizTimer" min="0" max="30" pin="true" step="2" snaps="true" class="ion-no-padding">
                   <ion-label slot="start">Off</ion-label>
                   <ion-label slot="end">30</ion-label>
                 </ion-range>
@@ -61,7 +61,7 @@
 
           <div class="form-group">
             <label><span dir="ltr">Cards per Quiz:</span></label>
-            <ion-range [(ngModel)]="Quiz.quizLimit" name="quizLimit" min="10" max="50" step="5" snaps="true" pin="true" no-padding>
+            <ion-range [(ngModel)]="Quiz.quizLimit" name="quizLimit" min="10" max="50" step="5" snaps="true" pin="true" class="ion-no-padding">
               <ion-label slot="start">10</ion-label>
               <ion-label slot="end">50</ion-label>
             </ion-range>

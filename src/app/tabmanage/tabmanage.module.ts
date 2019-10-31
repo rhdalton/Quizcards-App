@@ -36,6 +36,7 @@ import { MergecardsetComponent } from './components/mergecardset/mergecardset.co
       { path: 'quiz/:quizid', component: QuizformComponent },
       { path: 'quiz', component: QuizformComponent },
       { path: 'cards/:quizid', component: QuizcardsComponent },
+      { path: 'card/:quizid/:cardid/:addbefore', component: CardformComponent },
       { path: 'card/:quizid/:cardid', component: CardformComponent },
       { path: 'card/:quizid', component: CardformComponent }
     ])

@@ -365,15 +365,21 @@ export class SqliteService {
     }
   }
 
-  async addCards(cards: Card[], incr = false) {
+  async addCards(cards: Card[], incr = false, orderId: number = null) {
     // is device
     if (this.platform.is('cordova')) {
       this.db = await this.cdb();
       if (this.db) {
         let quiz: Quiz;
+        let _orderId: number;
         if (incr) quiz = await this.getQuiz(cards[0].quiz_id);
 
         for (let i = 0; i < cards.length; i++) {
+
+          if (orderId !== null) _orderId = orderId + 1;
+          else if (incr) _orderId = quiz.cardcount + 1 + i;          
+          else _orderId = cards[i].cardorder;          
+
           const newCard = [
             cards[i].id,
             cards[i].quiz_id,
@@ -387,19 +393,23 @@ export class SqliteService {
             cards[i].c_correct,
             cards[i].c_study,
             cards[i].c_substudy,
-            (incr) ? quiz.cardcount + 1 : cards[i].cardorder,
+            _orderId,
             cards[i].correct_count
           ];
 
           await this.db.executeSql('INSERT INTO Cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', newCard);
           if (incr) await this.db.executeSql('UPDATE Quizzes SET cardcount = cardcount+1 WHERE id =?', [cards[i].quiz_id]);
+          if (orderId !== null) {
+            await this.db.executeSql('UPDATE Cards SET cardorder = cardorder + 1 WHERE quiz_id = ? AND cardorder >= ?', [cards[i].quiz_id, _orderId]);
+          }
         }
       }
     } else {
       // webstorage
       if (incr) {
         const currentCards = await this.webstorage.getQuizCards(cards[0].quiz_id);
-        currentCards.push(cards[0]);
+        if (orderId !== null) currentCards.splice(orderId, 0, cards[0]);
+        else currentCards.push(cards[0]);
         await this.webstorage.saveQuizCards(currentCards, cards[0].quiz_id);
       } else {
         await this.webstorage.saveQuizCards(cards, cards[0].quiz_id);
