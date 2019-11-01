@@ -115,7 +115,8 @@ export class QuizcardsComponent implements OnInit {
         isShareable: this.Quiz.isShareable,
         mergeModal: () => this.mergeCardsetModal(),
         backupToCloud: () => this.backupToCloud(),
-        sortCards: () => this.sortCards()
+        sortCards: () => this.sortCards(),
+        exportToDevice: () => this.exportToDevice()
       },
       cssClass: 'standard-popover'
     }).then(p => p.present());
@@ -152,7 +153,22 @@ export class QuizcardsComponent implements OnInit {
     }).then(m => m.present());
   }
 
-  async backupToDevice() {
+  async exportToDevice() {
+    this.pop.dismiss();    
+
+    this.alert.create({
+      header: 'Export to Device',
+      message: 'This will create a file with your card set data on your device.',
+      buttons: [
+        { text: 'Cancel', role: 'cancel', handler: () => {} },
+        { text: 'Export', handler: () => this.doExport() }
+      ]
+    }).then(a => a.present());
+  }
+
+  doExport() {
+    console.log('export: ', this.File.externalApplicationStorageDirectory);
+    return;
     let quizJson = {
       quizname: this.Quiz.quizname,
       quizcolor: this.Quiz.quizcolor,

@@ -19,6 +19,7 @@ import { ComFavoritesComponent } from './components/com-favorites/com-favorites.
 import { ComDownloadComponent } from './components/com-download/com-download.component';
 import { ComUploadmodalComponent } from './components/com-uploadmodal/com-uploadmodal.component';
 import { Networkcategories } from '../shared/classes/networkcategories';
+import { ImportComponent } from './components/import/import.component';
 
 const routes: Routes = [
   { path: '', component: TabmorePage },
@@ -27,7 +28,8 @@ const routes: Routes = [
   { path: 'settings', component: SettingsComponent },
   { path: 'about', component: AboutComponent },
   { path: 'restore', component: RestoreComponent },
-  { path: 'community', component: CommunityComponent }
+  { path: 'community', component: CommunityComponent },
+  { path: 'import', component: ImportComponent}
 ];
 
 @NgModule({
@@ -43,6 +45,7 @@ const routes: Routes = [
     AboutComponent,
     RestoreComponent,
     CommunityComponent,
+    ImportComponent,
     ComHomeComponent,
     ComUploadComponent,
     ComFavoritesComponent,
