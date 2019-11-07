@@ -1,3 +1,20 @@
-<p>
-  import works!
-</p>
+<ion-content>
+  <ion-card class="qcard quiz-color-white">
+    <ion-item-divider class="header-text">
+      Import Quiz Cards backup:
+    </ion-item-divider>
+    <ion-item-divider>
+      <div class="ion-item-divider-inner">
+        Quiz Cards backkups are stored at /dir. If you don't see your backup card set, make sure it is located in the correct folder on your device.
+      </div>
+    </ion-item-divider>
+    <ion-item-divider *ngIf="backups.length === 0; else showBackups" class="alert alert-warning">
+      <span dir="ltr">No QuizCard backups found.</span>
+    </ion-item-divider>
+    <ng-template #showBackups>
+      <ion-item-divider *ngFor="let b of backups" (click)="restoreBackup(b)">
+        {{b.name}}
+      </ion-item-divider>
+    </ng-template>
+  </ion-card>
+</ion-content>
