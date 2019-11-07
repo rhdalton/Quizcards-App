@@ -2,8 +2,11 @@
 <ion-content>
   <ion-card *ngIf="Card" class="qcard quiz-color-white">
     <ion-card-content>
-      <div class="card-header" dir="ltr">{{cardheader}}:</div>
-      <div class="upload-image" (click)="showImageActionSheet()"></div>            
+      <div class="card-extras">
+        <div class="audiofile" (click)="selectAudioFile()"></div>
+        <div class="upload-image" (click)="showImageActionSheet()"></div>
+      </div>      
+      <div class="card-header" dir="ltr">{{cardheader}}:</div>      
 
       <div *ngIf="Card.c_image" style="position:relative;text-align: center;width:100%;">
         <div class="remove-image" (click)="removeImage()"><img src="assets/icon/redx.svg"></div>

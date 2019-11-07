@@ -108,6 +108,10 @@ export class CardformComponent implements OnInit, AfterViewChecked {
     this.router.navigate(['/tabs/tabmanage/cards', this._quizId]);
   }
 
+  selectAudioFile() {
+    
+  }
+
   async showImageActionSheet() {
     this.actionSheet.create({
       header: 'Select Image Source',

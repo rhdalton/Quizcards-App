@@ -314,15 +314,25 @@ ion-button {
       margin-right:6px;
     }
   }
+  .card-extras {
+    float: right;
+  }
 
-  .upload-image {
-    z-index:100;
-    position:absolute;
-    top:8px;
-    right:15px;
-    width:40px;
-    height:30px;
-    background:url('assets/icon/uploadimage.svg') right no-repeat;
+  .audiofile {
+    display: inline-block;
+    z-index: 100;
+    width: 40px;
+    height: 30px;
+    background: url('assets/icon/audiofile.svg') right no-repeat;
+    background-size: 27px;
+    margin-right: 5px;
+  }
+  .upload-image {    
+    display: inline-block;
+    z-index: 100;
+    width: 40px;
+    height: 30px;
+    background: url('assets/icon/uploadimage.svg') right no-repeat;
     background-size: 30px;
   }
 

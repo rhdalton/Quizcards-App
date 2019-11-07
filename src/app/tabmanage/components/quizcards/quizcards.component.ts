@@ -167,8 +167,7 @@ export class QuizcardsComponent implements OnInit {
   }
 
   doExport() {
-    console.log('export: ', this.File.externalApplicationStorageDirectory);
-    return;
+    //console.log('export: ', this.File.externalApplicationStorageDirectory);
     let quizJson = {
       quizname: this.Quiz.quizname,
       quizcolor: this.Quiz.quizcolor,
@@ -188,8 +187,17 @@ export class QuizcardsComponent implements OnInit {
 
     const quizJsonString = JSON.stringify(quizJson);
  
-    var filename = this.Quiz.quizname + ".qcs";
-    this.File.writeFile(this.File.externalApplicationStorageDirectory, filename, quizJsonString, {replace: true}) ; 
+    var filename = this.Quiz.quizname.replace(/[^\W]/gi, '') || 'unnamed';
+    filename += ".qcs";
+    this.File.writeFile(this.File.externalApplicationStorageDirectory, filename, quizJsonString, {replace: true}); 
+
+    this.alert.create({
+      header: 'Export to Device',
+      message: 'This set has been exported to ' + this.File.externalApplicationStorageDirectory,
+      buttons: [
+        { text: 'Ok', handler: () => this.alert.dismiss() }
+      ]
+    }).then(a => a.present());
   }
 
   async backupToCloud() {
