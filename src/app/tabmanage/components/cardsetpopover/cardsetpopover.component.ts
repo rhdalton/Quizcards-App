@@ -20,7 +20,7 @@ import { NetworkService } from 'src/app/services/network.service';
         <img src="assets/icon/backup.svg"> Back-up
     </ion-item-divider>
     <ion-item-divider (click)="exportToDevice()">
-        <img src="assets/icon/dltodevice.svg"> Export
+        <img src="assets/icon/export.svg"> Export
     </ion-item-divider>
     <ion-item-divider *ngIf="isShareable" (click)="share()">
         <img src="assets/icon/share.svg"> Share
