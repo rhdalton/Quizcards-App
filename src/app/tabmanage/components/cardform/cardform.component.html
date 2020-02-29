@@ -1,6 +1,6 @@
 
 <ion-content>
-  <ion-card *ngIf="Card" class="qcard quiz-color-white">
+  <ion-card *ngIf="Card" class="qcard quizcard quiz-color-white">
     <ion-card-content>
       <div class="card-extras">
         <div class="audiofile" (click)="selectAudioFile()"></div>
@@ -11,6 +11,9 @@
       <div *ngIf="Card.c_image" style="position:relative;text-align: center;width:100%;">
         <div class="remove-image" (click)="removeImage()"><img src="assets/icon/redx.svg"></div>
         <img class="card-image" src="{{ Card.c_image }}">
+      </div>
+      <div *ngIf="Card.c_audio">
+        <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(300, Card)"></ion-icon>
       </div>
       <form #f="ngForm" (ngSubmit)="save(f)">
         <div class="form-group">

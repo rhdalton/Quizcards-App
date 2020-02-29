@@ -14,6 +14,9 @@ import { CardpopoverComponent } from './components/cardpopover/cardpopover.compo
 import { ImageService } from '../services/images.service';
 import { CardsetpopoverComponent } from './components/cardsetpopover/cardsetpopover.component';
 import { MergecardsetComponent } from './components/mergecardset/mergecardset.component';
+import { AudiolistComponent } from './components/audiolist/audiolist.component';
+import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
+import { PlayAudio } from '../shared/classes/playaudio';
 
 @NgModule({
   declarations: [
@@ -22,12 +25,14 @@ import { MergecardsetComponent } from './components/mergecardset/mergecardset.co
     CardformComponent,
     CardpopoverComponent,
     CardsetpopoverComponent,
-    MergecardsetComponent
+    MergecardsetComponent,
+    AudiolistComponent
   ],
   entryComponents: [
     CardpopoverComponent,
     CardsetpopoverComponent,
-    MergecardsetComponent
+    MergecardsetComponent,
+    AudiolistComponent
   ],
   imports: [
     SharedModule,
@@ -42,6 +47,8 @@ import { MergecardsetComponent } from './components/mergecardset/mergecardset.co
     ])
   ],
   providers: [
+    TextToSpeech,
+    PlayAudio
   ]
 })
 export class TabmanagePageModule { }

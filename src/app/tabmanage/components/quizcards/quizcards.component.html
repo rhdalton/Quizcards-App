@@ -8,25 +8,34 @@
       <div class="card-count">{{Quiz.cardcount}} Card<span *ngIf="Quiz.cardcount!=1">s</span></div>
       <div class="card-actions">
         <div (click)="addCard()" class="add-action">+ ADD CARD</div>
-        <div *ngIf="Cards && Cards.length > 0" class="add-action card-view" (click)="switchView()"><img src="assets/icon/{{ Quiz.cardview }}.svg"></div>
+        <div (click)="showSearch()" class="add-action card-view"><img src="assets/icon/search.svg"></div>
+        <div *ngIf="allCards && allCards.length > 0" class="add-action card-view" (click)="switchView()"><img src="assets/icon/{{ Quiz.cardview }}.svg"></div>
       </div>
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngIf="_cardsloaded && Cards.length < 2" class="alert-notify">        
-    <ion-card-content *ngIf="Cards.length==0">
+  <ion-card *ngIf="_cardsloaded && allCards.length < 2" class="alert-notify">        
+    <ion-card-content *ngIf="allCards.length==0">
       Note: For most effective Multiple Choice Quizzes, create cards that will have similar type of answers (dates, definitions, vocabulary etc). The Quiz will display the correct answer
       along with 3 other random answers from other cards in this set. Having cards with different kinds of answers may make the choosing the correct answer easier.
     </ion-card-content>
-    <ion-card-content *ngIf="Cards.length==1">
+    <ion-card-content *ngIf="allCards.length==1">
         It's recommened to have at least 4 cards for effective Multiple Choice Quizzes.
     </ion-card-content>
   </ion-card>
 
-  <ion-card *ngFor="let c of Cards; let i = index" class="qcard cardlist quiz-color-white" [class.compact-view]="Cards.length>0 && Quiz.cardview=='compact-view'">
+  <ion-card-content *ngIf="_showSearch" style="margin-top:-10px">
+    <input #searchTerm (keyup)="filterCards(searchTerm.value)" type="text" class="input-text bgfocus" placeholder="Filter cards by typing here...">
+  </ion-card-content>
+
+  <ion-card 
+    *ngFor="let c of filteredCards; let i = index" 
+    class="qcard cardlist quiz-color-white" 
+    [class.compact-view]="allCards.length>0 && Quiz.cardview=='compact-view'"
+    [class.hidden-card]="c.is_hidden == 1">
     <ion-card-content>
       <div class="right">
-        <div (click)="cardOptions($event, c.id, i)" class="edit-card"></div>
+        <div (click)="cardOptions($event, c.id, i, c.is_hidden)" class="edit-card" [class.hidden-edit]="c.is_hidden"></div>
       </div>
         {{ i + 1 }}. 
         <img *ngIf="c.c_image && Quiz.cardview=='detail-view'" class="card-image image-small" src="{{ c.c_image }}">

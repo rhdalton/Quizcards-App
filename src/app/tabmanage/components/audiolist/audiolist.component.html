@@ -1,0 +1,20 @@
+
+<ion-content>
+  <div class="quizModal">
+    <div class="content-header">
+        <div class="right" (click)="close()">CANCEL</div>        
+        <span dir="ltr"><img src="assets/icon/audiofile.svg"> INSERT AUDIO FILE</span>
+    </div>  
+    <ion-item-divider>
+      <div class="ion-item-inner">
+        <div class="com-dl-title" dir="ltr">
+          Select the audio file to attach to this card:
+        </div>
+        <div *ngFor="let a of audioList" class="com-dl-meta lh-5" (click)="addAudio(a)">{{a.name}}<div class="sm">{{a.fullPath}}</div></div>
+      </div>
+    </ion-item-divider>
+    <ion-item-divider *ngIf="searching">
+      Searching...
+    </ion-item-divider>
+  </div>
+</ion-content>

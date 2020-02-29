@@ -230,6 +230,22 @@ ion-button {
   }
 }
 
+.search-icon {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  border-radius: 17px 0 0 17px;
+  width: 40px;
+  height: 34px;
+  background-color: $card-blue-color;
+  border: 1px solid $card-blue-color;
+  z-index: 10;
+  img {
+    width: 33px;
+    padding: 7px 5px 5px 10px;
+  }
+}
+
 .qcard {
   font-weight:600;
   color: $default-color;
@@ -239,6 +255,12 @@ ion-button {
   .std-text {
     font-size:14px;
     font-weight:400;
+  }
+
+  &.hidden-card {
+    background: #f5f5f5;
+    color: #ccc;
+    border-color: #ebebeb;
   }
 
   &.std-card {
@@ -295,6 +317,10 @@ ion-button {
     margin-top:-5px;
     background: url('assets/icon/edit.svg') right no-repeat;
     background-size: 22px;
+    &.hidden-edit {
+      background: url('assets/icon/hide.svg') right no-repeat;
+      background-size: 20px;
+    }
   }
 
   .set-settings {
@@ -364,8 +390,10 @@ ion-button {
       margin-bottom:-3px;
     }
     .card-text {
+      padding-bottom: 30px;
       min-height:38vh;
       font-size:32px;
+      position: relative;
       &.qcardswitch {
         min-height:28vh;
       }
@@ -469,6 +497,14 @@ ion-button {
       position: absolute;
       bottom:0;
       left:0;
+      &.study-card-options {
+        left: auto;
+        right: 0;
+        img {
+          width: 30px;
+          padding:5px;
+        }
+      }
     }
   }
   //** quiz results page **/

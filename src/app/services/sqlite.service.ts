@@ -89,7 +89,8 @@ export class SqliteService {
           c_study TEXT,
           c_substudy TEXT,
           cardorder TINYINT,
-          correct_count SMALLINT)`, []);
+          correct_count SMALLINT,
+          is_hidden TINYINT)`, []);
         await this.db.executeSql('CREATE INDEX quiz_id ON Cards(quiz_id)', []);
         await this.db.executeSql('CREATE INDEX cardorder ON Cards(cardorder)', []);
         await this.db.executeSql('CREATE INDEX correct_count ON Cards(correct_count)', []);
@@ -120,7 +121,14 @@ export class SqliteService {
         this._apps.dbVersion = 1.3;
       }
 
-      this._apps.dbVersion = 1.3;
+      // DB Patch 1.4
+      // Add is_hidden to Cards table
+      if (this._apps.dbVersion === 1.3) {
+        await this.db.executeSql('ALTER TABLE Cards ADD COLUMN is_hidden TINYINT DEFAULT 0', []);
+        this._apps.dbVersion = 1.4;
+      }
+
+      this._apps.dbVersion = 1.4;
 
       await this.app.setAppSettings(this._apps);
     }
@@ -394,10 +402,11 @@ export class SqliteService {
             cards[i].c_study,
             cards[i].c_substudy,
             _orderId,
-            cards[i].correct_count
+            cards[i].correct_count,
+            cards[i].is_hidden
           ];
 
-          await this.db.executeSql('INSERT INTO Cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', newCard);
+          await this.db.executeSql('INSERT INTO Cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', newCard);
           if (incr) await this.db.executeSql('UPDATE Quizzes SET cardcount = cardcount+1 WHERE id =?', [cards[i].quiz_id]);
           if (orderId !== null) {
             await this.db.executeSql('UPDATE Cards SET cardorder = cardorder + 1 WHERE quiz_id = ? AND cardorder >= ?', [cards[i].quiz_id, _orderId]);
@@ -447,6 +456,20 @@ export class SqliteService {
     } else {
       // webstorage
       await this.webstorage.updateQuizCard(card);
+    }
+  }
+
+  async hideCard(cardId, quizId, unhide = false) {
+    // is device
+    if (this.platform.is('cordova')) {
+      this.db = await this.cdb();
+      if (this.db) {
+        const hide = (unhide) ? 0 : 1;
+        await this.db.executeSql(`UPDATE Cards SET is_hidden = ? WHERE id=?`, [hide, cardId]);
+      }
+    } else {
+      // webstorage
+      await this.webstorage.hideQuizCard(cardId, quizId, unhide);
     }
   }
 

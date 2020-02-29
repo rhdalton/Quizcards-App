@@ -1,6 +1,12 @@
 <ion-content>
   <div *ngIf="_homeLoaded">
-    <ion-card *ngFor="let q of Quizzes" class="qcard std-card {{q.quizcolor}}">
+    <div class="search-icon" (click)="showFilter()"><img src="assets/icon/search.svg"></div>
+
+    <ion-card-content *ngIf="_showFilter" style="margin-top: -2px">
+      <input #searchTerm (keyup)="filterSets(searchTerm.value)" type="text" class="input-text bgfocus" placeholder="Filter sets by typing name here...">
+    </ion-card-content>
+
+    <ion-card *ngFor="let q of filteredQuizzes" class="qcard std-card {{q.quizcolor}}">
       <ion-card-content>
         {{q.quizname}}
         <div class="card-count">{{q.cardcount}} Card<span [hidden]="q.cardcount==1">s</span></div>
@@ -16,6 +22,11 @@
     <ion-card *ngIf="Quizzes.length==0" class="alert-notify">
       <ion-card-content dir="ltr">
         No QuizCard sets found. Click the "CREATE" tab to create a new set.
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="_showFilter && filteredQuizzes.length==0" class="alert-notify">
+      <ion-card-content dir="ltr">
+        No QuizCard sets match your search.
       </ion-card-content>
     </ion-card>
   </div>

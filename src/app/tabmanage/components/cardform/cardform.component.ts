@@ -3,12 +3,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Card } from 'src/app/models/card';
 import { AppSettings } from 'src/app/models/appsettings';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
-import { ActionSheetController } from '@ionic/angular';
+import { ActionSheetController, ModalController, AlertController, Platform, LoadingController } from '@ionic/angular';
 import { Camera } from '@ionic-native/Camera/ngx';
 import { SqliteService } from 'src/app/services/sqlite.service';
 import * as uuid from 'uuid';
 import { ImageService } from 'src/app/services/images.service';
 import { Achievements } from 'src/app/shared/classes/achievements';
+import { File } from '@ionic-native/File/ngx';
+import { FilePath } from '@ionic-native/file-path/ngx';
+import { AudiolistComponent } from '../audiolist/audiolist.component';
+import { PlayAudio } from 'src/app/shared/classes/playaudio';
 
 @Component({
   selector: 'app-cardform',
@@ -21,6 +25,7 @@ export class CardformComponent implements OnInit, AfterViewChecked {
   _addBefore: string;
   _apps: AppSettings;
   _tempImage: string;
+  _tempAudio: string;
   advFields = false;
   isPro = false;
   Card: Card;
@@ -35,13 +40,17 @@ export class CardformComponent implements OnInit, AfterViewChecked {
     private actionSheet: ActionSheetController,
     private camera: Camera,
     private images: ImageService,
-    private ach: Achievements
+    private ach: Achievements,
+    private modal: ModalController,
+    private loader: LoadingController,
+    public audio: PlayAudio
   ) {
     this._quizId = this.route.snapshot.params.quizid;
     this._cardId = this.route.snapshot.params.cardid;
     this._addBefore = this.route.snapshot.params.addbefore;
 
     this._tempImage = '';
+    this._tempAudio = '';
     this.errorMsg = '';
 
     if (!this._cardId || this._cardId === '0') {
@@ -59,7 +68,8 @@ export class CardformComponent implements OnInit, AfterViewChecked {
         c_study: '',
         c_substudy: '',
         cardorder: 0,
-        correct_count: 0
+        correct_count: 0,
+        is_hidden: 0
       };
       this.cardheader = 'Add Card';
       if (this._addBefore) this.cardheader += ' (before card #' + (parseInt(this._addBefore) + 1) + ')';
@@ -74,6 +84,7 @@ export class CardformComponent implements OnInit, AfterViewChecked {
     if (this._quizId && this._cardId && this._cardId !== '0') {
       this.Card = await this.sqlite.getQuizCard(this._cardId, this._quizId);
       this._tempImage = this.Card.image_path;
+      this._tempAudio = this.Card.audio_path;
     }
     this.isPro = this.app.isPro(this._apps.userStatus);
   }
@@ -108,8 +119,26 @@ export class CardformComponent implements OnInit, AfterViewChecked {
     this.router.navigate(['/tabs/tabmanage/cards', this._quizId]);
   }
 
-  selectAudioFile() {
-    
+  async selectAudioFile() {
+    const loader = await this.loader.create({
+      message: 'Loading Audio File...'
+    });
+    const af = await this.modal.create({
+      component: AudiolistComponent,
+      componentProps: {
+        modal: this.modal,
+        loader: loader
+      }
+    });
+    af.present();
+    af.onDidDismiss().then(async (res) => {
+      console.log('dismissed', res);
+      if (res.data) {
+        this.Card.c_audio = res.data.name;
+        this._tempAudio = res.data.fullPath;
+        loader.dismiss();
+      }
+    });
   }
 
   async showImageActionSheet() {

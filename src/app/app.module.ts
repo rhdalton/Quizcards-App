@@ -24,6 +24,7 @@ import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { Achievements } from './shared/classes/achievements';
 import { AchievealertComponent } from './shared/components/achievealert/achievealert.component';
+import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 
 @NgModule({
   declarations: [
@@ -55,7 +56,8 @@ import { AchievealertComponent } from './shared/components/achievealert/achievea
     FileTransfer,
     WebView,
     Achievements,
-    Network
+    Network,
+    TextToSpeech
   ],
   bootstrap: [AppComponent]
 })

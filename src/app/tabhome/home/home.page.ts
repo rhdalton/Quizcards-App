@@ -15,7 +15,9 @@ import { Achievements } from 'src/app/shared/classes/achievements';
 })
 export class HomePage implements OnInit {
   Quizzes: Quiz[] = [];
+  filteredQuizzes: Quiz[];
   _homeLoaded = false;
+  _showFilter = false;
 
   constructor(
     private sqlite: SqliteService,
@@ -33,12 +35,23 @@ export class HomePage implements OnInit {
     // this.ach.updateLocalAchievement(13, 1);
   }
 
+  showFilter() {
+    this._showFilter = !this._showFilter;
+    if (!this._showFilter) this.filteredQuizzes = this.Quizzes;
+  }
+  filterSets(term) {
+    this.filteredQuizzes = this.Quizzes.filter(function(q) {
+      return q.quizname.includes(term);
+    });
+  }
+
   async ionViewWillEnter() {
     this.getQuizes();
   }
 
   async getQuizes() {
     this.Quizzes = await this.sqlite.getQuizzes();
+    this.filteredQuizzes = this.Quizzes;
     this._homeLoaded = true;
   }
 

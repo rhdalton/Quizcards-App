@@ -14,4 +14,5 @@ export interface Card {
   c_substudy: string;
   cardorder: number;
   correct_count: number;
+  is_hidden: number;
 }

@@ -1,0 +1,4 @@
+ion-card {
+  display: block; // I needed this to make my element touchable
+  touch-action: pan-y !important;
+}

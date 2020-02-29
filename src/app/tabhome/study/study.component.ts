@@ -7,12 +7,13 @@ import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { AppSettings } from 'src/app/models/appsettings';
 import { animate, style, transition, trigger } from '@angular/animations';
 import 'hammerjs';
-import { PopoverController, Platform } from '@ionic/angular';
+import { PopoverController, Platform, AlertController } from '@ionic/angular';
 import { QuiztypeComponent } from '../components/quiztype/quiztype.component';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { QuizClass } from 'src/app/shared/classes/quiz';
 import { ToastNotification } from 'src/app/shared/classes/toast';
 import { Achievements } from 'src/app/shared/classes/achievements';
+import { PlayAudio } from 'src/app/shared/classes/playaudio';
 
 @Component({
   selector: 'app-study',
@@ -38,6 +39,7 @@ export class StudyComponent implements OnInit {
   currentcard = 1;
   Cards: Card[];
   Card: Card;
+  slideCards: Card[];
   studyFinished = false;
   audioActive = false;
   studyCount = 0;
@@ -51,7 +53,9 @@ export class StudyComponent implements OnInit {
     private tts: TextToSpeech,
     private quizClass: QuizClass,
     private toast: ToastNotification,
-    private ach: Achievements
+    private ach: Achievements,
+    private audio: PlayAudio,
+    private alert: AlertController
   ) {
     this.quizId = this.route.snapshot.params.quizid;
     this.reload = this.route.snapshot.params.rl || '';
@@ -68,6 +72,10 @@ export class StudyComponent implements OnInit {
 
       this.qcardsize = this.quizClass.setQcardSize(this.Quiz.switchtext);
       this.Cards = await this.sqlite.getQuizCards(this.Quiz.id);
+      // remove hidden cards from set
+      this.Cards = this.Cards.filter(function(card) {
+        return card.is_hidden !== 1;
+      });
 
       this.loadStudy();
     }
@@ -95,6 +103,7 @@ export class StudyComponent implements OnInit {
   async loadStudy() {
     if (this.Quiz.studyShuffle === 1) this.Cards = this.randomSortArray(this.Cards);
     this.Card = this.Cards[0];
+    this.slideCards = this.Cards.slice(0, 2);
     this.currentcard = 1;
     this.studyFinished = true;
     this.setFontSize();
@@ -149,35 +158,19 @@ export class StudyComponent implements OnInit {
     } else if (event.direction === 4) {
       if (this._app.rtl) this.nextCard();
       else this.prevCard();
-    } else return;
+    }
   }
 
-  async playAudio(ms) {
-    await this.delay(ms);
-    this.audioActive = true;
-    await this.play();
-    this.audioActive = false;
-  }
+  async hideCard(cardId) {    
+    await this.sqlite.hideCard(cardId, this.quizId);
 
-  play() {
-    return new Promise((res) => {
-      if (this.Card.c_audio) {
-        // this.audioCard.play();
-        // this.audioCard.onended = res;
-      } else
-      if (this.Quiz.tts !== '' && this.platform.is('cordova')) {
-        this.tts.speak({
-          text: this.Card.c_text,
-          locale: this.Quiz.tts,
-          rate: this.Quiz.ttsSpeed / 100
-        }).then(() => res())
-        .catch(err => {
-          this.toast.loadToast('Error playing audio. Check if TTS language correct.', 5);
-        });
-      } else {
-        res();
-      }
-    });
+    this.alert.create({
+      header: 'Card Hidden',
+      message: 'This card has been hidden and will no longer appear in your Study & Quiz modes.',
+      buttons: [
+        { text: 'OK' }
+      ]
+    }).then(a => a.present());
   }
 
   setFontSize() {

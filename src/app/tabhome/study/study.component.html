@@ -1,11 +1,10 @@
-
 <ion-content>
   <div *ngIf="Card; else studyEnd">
-    <ion-slides [options]="slideOpts">
-      <ion-slide>
+    <ion-slides>
+      <ion-slide>          
         <ion-card class="qcard quizcard {{Quiz.quizcolor}}" (swipe)="swipeCard($event)" [@animateCard]="_cardCountSwipe">
           <div class="quiz-header qctext">
-            <div class="right">CARD {{currentcard}} / {{Quiz.cardcount}}</div>
+            <div class="right">CARD {{currentcard}} / {{Cards.length}}</div>
             {{Quiz.quizname}}
           </div>
           <ion-card-content>
@@ -17,7 +16,7 @@
                   {{Card.c_subtext}}
                 </div>
                 <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
-                  <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audioActive" (click)="playAudio(300)"></ion-icon>
+                  <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(300, Card, Quiz)"></ion-icon>
                 </div>
               </div>
               <ng-template #switch>
@@ -28,6 +27,10 @@
                   </div>
                 </div>
               </ng-template>
+
+              <div class="card-options study-card-options">
+                <div><img (click)="hideCard(Card.id)" src="assets/icon/hide.svg"></div>
+              </div>
             </div>
             <div class="card-answer bt {{qcardsize}}">
               <div [hidden]="!_viewAnswer">
@@ -49,7 +52,7 @@
               <div [hidden]="_viewAnswer" (click)="showAnswer()" style="padding-bottom:50px;">[show answer]</div>
             </div>
           </ion-card-content>
-        </ion-card>
+        </ion-card>      
       </ion-slide>
     </ion-slides>
 
@@ -64,6 +67,4 @@
   <ng-template #studyEnd>  
     <app-quizresult *ngIf="studyFinished" [quizId]="Quiz.id" [quizType]="'study'" [reload]="reload"></app-quizresult>
   </ng-template>
-
-</ion-content>
-  
+</ion-content>  

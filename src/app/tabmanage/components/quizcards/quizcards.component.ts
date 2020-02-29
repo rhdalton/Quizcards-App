@@ -26,8 +26,10 @@ export class QuizcardsComponent implements OnInit {
   _apps: AppSettings;
   _isPro: boolean;
   _color: string;
+  _showSearch: boolean;
   Quiz: Quiz;
-  Cards: Card[];
+  allCards: Card[];
+  filteredCards: Card[];
 
   constructor(
     private route: ActivatedRoute,
@@ -43,10 +45,11 @@ export class QuizcardsComponent implements OnInit {
     private File: File
   ) {
     this._quizId = this.route.snapshot.params.quizid;
-    this._cardsloaded = false;
+    this._cardsloaded = false;    
   }
 
   async ngOnInit() {
+
   }
 
   async ionViewWillEnter() {
@@ -55,6 +58,7 @@ export class QuizcardsComponent implements OnInit {
       this.Quiz = await this.sqlite.getQuiz(this._quizId);
       this._limits = this.app.appLimits(this._apps.userStatus);
       this._isPro = this.app.isPro(this._apps.userStatus);
+      this._showSearch = false;
 
       if (this.Quiz) {
         this.getCards();
@@ -63,13 +67,14 @@ export class QuizcardsComponent implements OnInit {
   }
 
   async getCards() {
-    this.Cards = await this.sqlite.getQuizCards(this._quizId);
-    this.Quiz.cardcount = this.Cards.length;
+    this.allCards = await this.sqlite.getQuizCards(this._quizId);
+    this.filteredCards = this.allCards;
+    this.Quiz.cardcount = this.allCards.length;
     this._cardsloaded = true;
   }
 
   addCard(pos: number = null) {
-    if (this.Cards.length >= this._limits.cardLimit) {
+    if (this.allCards.length >= this._limits.cardLimit) {
       let msg = 'You have reached the Personal limit of ' + this._limits.cardLimit + ' cards. Please upgrade to a Pro account to increase the card limit.';
       if (this._isPro) msg = 'Card sets have a limit of ' + this._limits.cardLimit + ' cards to ensure best app performance. Please create a new set.';
       this.alert.create({
@@ -85,7 +90,20 @@ export class QuizcardsComponent implements OnInit {
     }
   }
 
-  async cardOptions(ev: any, cardId, orderId) {
+  showSearch() {
+    this._showSearch = !this._showSearch;
+    if (!this._showSearch) {
+      this.filteredCards = this.allCards;
+    }
+  }
+
+  filterCards(term) {
+    this.filteredCards = this.allCards.filter(function(card) {
+      return card.c_text.includes(term) || card.c_study.includes(term);
+    });
+  }
+
+  async cardOptions(ev: any, cardId, orderId, isHidden) {
     const popover = await this.pop.create({
       component: CardpopoverComponent,
       event: ev,
@@ -94,8 +112,11 @@ export class QuizcardsComponent implements OnInit {
         popover: this.pop,
         quizId: this._quizId,
         cardId: cardId,
+        isHidden: isHidden,
         deleteCard: () => this.deleteCardAlert(cardId),
-        addBefore: () => { this.pop.dismiss(); this.addCard(orderId); }
+        addBefore: () => { this.pop.dismiss(); this.addCard(orderId); },
+        hideCard: () => { this.pop.dismiss(); this.hideCard(cardId); },
+        unhideCard: () => { this.pop.dismiss(); this.unhideCard(cardId); }
       },
       cssClass: 'standard-popover'
     });
@@ -122,6 +143,28 @@ export class QuizcardsComponent implements OnInit {
     }).then(p => p.present());
   }
 
+  async hideCard(cardId) {
+    await this.sqlite.hideCard(cardId, this._quizId);
+    for (let i = 0; i < this.filteredCards.length; i++) {
+      if (this.filteredCards[i].id === cardId) {
+        this.filteredCards[i].is_hidden = 1;
+        break;
+      }
+    }
+    this.toast.loadToast('Card has been hidden.');
+  }
+
+  async unhideCard(cardId) {
+    await this.sqlite.hideCard(cardId, this._quizId, true);
+    for (let i = 0; i < this.filteredCards.length; i++) {
+      if (this.filteredCards[i].id === cardId) {
+        this.filteredCards[i].is_hidden = 0;
+        break;
+      }
+    }
+    this.toast.loadToast('Card has been un-hidden.');
+  }
+
   deleteCardAlert(cardId) {
     this.alert.create({
       header: 'Delete Card',
@@ -134,8 +177,9 @@ export class QuizcardsComponent implements OnInit {
   }
 
   async deleteCard(cardId) {
-    this.Cards = await this.sqlite.deleteCard(cardId, this.Cards, this._quizId);
-    this.Quiz.cardcount = this.Cards.length;
+    this.allCards = await this.sqlite.deleteCard(cardId, this.allCards, this._quizId);
+    this.filteredCards = this.allCards;
+    this.Quiz.cardcount = this.allCards.length;
     this.toast.loadToast('Card has been deleted.');
   }
 
@@ -174,7 +218,7 @@ export class QuizcardsComponent implements OnInit {
       cards: []
     }
 
-    for(const c of this.Cards) {
+    for(const c of this.allCards) {
       const cardJson = {
         txt: c.c_text,
         subtxt: c.c_subtext,
@@ -206,7 +250,7 @@ export class QuizcardsComponent implements OnInit {
       this.network.alertOffline('back-up to the cloud');
       return;
     }
-    if (this.Cards.length === 0) {
+    if (this.allCards.length === 0) {
       this.alert.create({
         message: 'At least one card is required to back-up a Card Set to the cloud.',
         buttons: ['OK']
@@ -219,8 +263,8 @@ export class QuizcardsComponent implements OnInit {
   async sortCards() {
     const loader = await this.loader.create({ message: 'Re-ordering cards...'});
     loader.present();
-    this.Cards.sort(this.sortCompareCards);
-    await this.sqlite.sortCards(this.Cards);
+    this.allCards.sort(this.sortCompareCards);
+    await this.sqlite.sortCards(this.allCards);
     loader.dismiss();
     this.toast.loadToast('Card re-ordering complete!');
   }

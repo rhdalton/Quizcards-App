@@ -73,6 +73,18 @@ export class WebstorageService {
     await this.updateQuizCardCount(quizId, cards.length);
   }
 
+  async hideQuizCard(cardId, quizId, unhide) {
+    const hide = (unhide) ? 0 : 1;
+    const cards = await this.getQuizCards(quizId);
+    for (let i = 0; i < cards.length; i++) {
+      if (cards[i].id === cardId) {
+        cards[i].is_hidden = hide;
+        break;
+      }
+    }
+    this.saveQuizCards(cards, quizId);
+  }
+
   async updateQuizCard(card: Card) {
     const cards = await this.getQuizCards(card.quiz_id);
     for (let i = 0; i < cards.length; i++) {

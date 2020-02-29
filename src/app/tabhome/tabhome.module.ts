@@ -1,26 +1,14 @@
-import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
-import { NgModule, Injectable } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { NgModule } from '@angular/core';
 import { HomePage } from './home/home.page';
 import { SharedModule } from '../shared/shared.module';
 import { QuizComponent } from './quiz/quiz.component';
 import { StudyComponent } from './study/study.component';
-import { HAMMER_GESTURE_CONFIG, HammerGestureConfig, BrowserModule } from '@angular/platform-browser';
+import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { QuiztypeComponent } from './components/quiztype/quiztype.component';
 import { QuizresultComponent } from './components/quizresult/quizresult.component';
 import { QuizClass } from '../shared/classes/quiz';
-
-export class ScrollWithSwipeConfig extends HammerGestureConfig {
-  overrides = {
-      // pan: { direction: 30 },
-      pinch: { enable: false },
-      rotate: { enable: false }
-  };
-}
 
 @NgModule({
   imports: [
@@ -44,7 +32,7 @@ export class ScrollWithSwipeConfig extends HammerGestureConfig {
     QuiztypeComponent
   ],
   providers: [
-    { provide: HAMMER_GESTURE_CONFIG, useClass: ScrollWithSwipeConfig },
+    //{ provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     TextToSpeech,
     QuizClass
   ]
