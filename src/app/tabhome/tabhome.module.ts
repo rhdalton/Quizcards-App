@@ -4,11 +4,11 @@ import { HomePage } from './home/home.page';
 import { SharedModule } from '../shared/shared.module';
 import { QuizComponent } from './quiz/quiz.component';
 import { StudyComponent } from './study/study.component';
-import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { QuiztypeComponent } from './components/quiztype/quiztype.component';
 import { QuizresultComponent } from './components/quizresult/quizresult.component';
 import { QuizClass } from '../shared/classes/quiz';
+import { Keyboard } from '@ionic-native/keyboard/ngx';
 
 @NgModule({
   imports: [
@@ -32,9 +32,9 @@ import { QuizClass } from '../shared/classes/quiz';
     QuiztypeComponent
   ],
   providers: [
-    //{ provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     TextToSpeech,
-    QuizClass
+    QuizClass,
+    Keyboard
   ]
 })
 export class TabhomeModule {}

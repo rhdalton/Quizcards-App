@@ -14,6 +14,7 @@ import { QuizClass } from 'src/app/shared/classes/quiz';
 import { ToastNotification } from 'src/app/shared/classes/toast';
 import { Achievements } from 'src/app/shared/classes/achievements';
 import { PlayAudio } from 'src/app/shared/classes/playaudio';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-study',
@@ -55,7 +56,8 @@ export class StudyComponent implements OnInit {
     private toast: ToastNotification,
     private ach: Achievements,
     private audio: PlayAudio,
-    private alert: AlertController
+    private alert: AlertController,
+    private nav: NavController
   ) {
     this.quizId = this.route.snapshot.params.quizid;
     this.reload = this.route.snapshot.params.rl || '';
@@ -73,7 +75,7 @@ export class StudyComponent implements OnInit {
       this.qcardsize = this.quizClass.setQcardSize(this.Quiz.switchtext);
       this.Cards = await this.sqlite.getQuizCards(this.Quiz.id);
       // remove hidden cards from set
-      this.Cards = this.Cards.filter(function(card) {
+      this.Cards = this.Cards.filter((card) => {
         return card.is_hidden !== 1;
       });
 
@@ -161,16 +163,20 @@ export class StudyComponent implements OnInit {
     }
   }
 
-  async hideCard(cardId) {    
+  async hideCard(cardId) {
     await this.sqlite.hideCard(cardId, this.quizId);
 
     this.alert.create({
       header: 'Card Hidden',
-      message: 'This card has been hidden and will no longer appear in your Study & Quiz modes.',
+      message: 'This card has been hidden and will no longer appear in your Study & Quiz modes. You will still be able to see it when you edit this card set.',
       buttons: [
         { text: 'OK' }
       ]
     }).then(a => a.present());
+  }
+
+  editCard(cardId) {
+    this.nav.navigateForward('/tabs/tabmanage/card/' + this.quizId + '/' + cardId, { animated: false, });
   }
 
   setFontSize() {

@@ -28,11 +28,12 @@
                 </div>
               </ng-template>
 
-              <div class="card-options study-card-options">
+              <div class="card-options study-card-options">                
                 <div><img (click)="hideCard(Card.id)" src="assets/icon/hide.svg"></div>
+                <div><img (click)="editCard(Card.id)" src="assets/icon/edit.svg"></div>
               </div>
             </div>
-            <div class="card-answer bt {{qcardsize}}">
+            <div class="card-answer bt {{fontsize}} {{qcardsize}}">
               <div [hidden]="!_viewAnswer">
                 <div *ngIf="Quiz.switchtext==0; else switchans" dir="ltr">
                   {{Card.c_study}}

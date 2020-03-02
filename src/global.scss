@@ -420,6 +420,9 @@ ion-button {
       &.qcardswitch {
         min-height:35vh;
       }
+      &.sm3 {
+        font-size: 16px;
+      }
     }
     &.study-nav {
       &.sc-ion-card-md-h {
@@ -500,6 +503,10 @@ ion-button {
       &.study-card-options {
         left: auto;
         right: 0;
+        div {
+          display: inline-block;
+          margin-left: 10px;
+        }
         img {
           width: 30px;
           padding:5px;

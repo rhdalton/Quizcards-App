@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NavParams } from '@ionic/angular';
+import { NavParams, NavController } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,10 +12,10 @@ import { Router } from '@angular/router';
     <ion-item-divider (click)="addBefore()">
       <img src="assets/icon/add.svg"> Add Before
     </ion-item-divider>
-    <ion-item-divider (click)="hide()" *ngIf="!isHidden">
+    <ion-item-divider (click)="hide()" *ngIf="!_isHidden">
       <img src="assets/icon/hide.svg"> Hide Card
     </ion-item-divider>
-    <ion-item-divider (click)="unhide()" *ngIf="isHidden">
+    <ion-item-divider (click)="unhide()" *ngIf="_isHidden">
       <img src="assets/icon/unhide.svg"> Unhide Card
     </ion-item-divider>
     <ion-item-divider (click)="deleteCardAlert()" lines="none">
@@ -33,7 +33,8 @@ export class CardpopoverComponent {
 
   constructor(
     private router: Router,
-    private params: NavParams) {
+    private params: NavParams,
+    private nav: NavController) {
 
     this._pop = params.get('popover');
     this._quizId = params.get('quizId');
@@ -43,7 +44,7 @@ export class CardpopoverComponent {
 
   editCard() {
     this._pop.dismiss();
-    this.router.navigate(['/tabs/tabmanage/card', this._quizId, this._cardId]);
+    this.nav.navigateForward('/tabs/tabmanage/card/' + this._quizId + '/' + this._cardId, { animated: false, });
   }
   addBefore() {
     this.params.get('addBefore')();

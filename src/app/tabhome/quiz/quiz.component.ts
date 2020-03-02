@@ -118,7 +118,7 @@ export class QuizComponent implements OnInit {
 
     this.allCards = await this.sqlite.getQuizCards(this.quizId, true);
     // remove hidden cards from set
-    this.allCards = this.allCards.filter(function(card) {
+    this.allCards = this.allCards.filter((card) => {
       return card.is_hidden !== 1;
     });
     if (this.Quiz.quizLimit < this.allCards.length) this.Cards = this.allCards.slice(0, this.Quiz.quizLimit);

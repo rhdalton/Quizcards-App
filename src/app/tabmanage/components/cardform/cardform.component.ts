@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Card } from 'src/app/models/card';
 import { AppSettings } from 'src/app/models/appsettings';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
-import { ActionSheetController, ModalController, AlertController, Platform, LoadingController } from '@ionic/angular';
+import { ActionSheetController, ModalController, AlertController, Platform, LoadingController, NavController } from '@ionic/angular';
 import { Camera } from '@ionic-native/Camera/ngx';
 import { SqliteService } from 'src/app/services/sqlite.service';
 import * as uuid from 'uuid';
@@ -43,7 +43,8 @@ export class CardformComponent implements OnInit, AfterViewChecked {
     private ach: Achievements,
     private modal: ModalController,
     private loader: LoadingController,
-    public audio: PlayAudio
+    public audio: PlayAudio,
+    private navCtrl: NavController
   ) {
     this._quizId = this.route.snapshot.params.quizid;
     this._cardId = this.route.snapshot.params.cardid;
@@ -72,7 +73,7 @@ export class CardformComponent implements OnInit, AfterViewChecked {
         is_hidden: 0
       };
       this.cardheader = 'Add Card';
-      if (this._addBefore) this.cardheader += ' (before card #' + (parseInt(this._addBefore) + 1) + ')';
+      if (this._addBefore) this.cardheader += ' (before card #' + (parseInt(this._addBefore, 10) + 1) + ')';
     } else {
       this.cardheader = 'Edit Card';
     }
@@ -111,12 +112,12 @@ export class CardformComponent implements OnInit, AfterViewChecked {
     } else {
       // saving new card
       this.Card.id = uuid.v1();
-      if (this._addBefore) await this.sqlite.addCards([this.Card], true, parseInt(this._addBefore));
+      if (this._addBefore) await this.sqlite.addCards([this.Card], true, parseInt(this._addBefore, 10));
       else await this.sqlite.addCards([this.Card], true);
       this.ach.updateLocalAchievement(11, 1);
     }
 
-    this.router.navigate(['/tabs/tabmanage/cards', this._quizId]);
+    this.navCtrl.navigateForward('/tabs/tabmanage/cards/' + this._quizId, { animated: false, });
   }
 
   async selectAudioFile() {

@@ -17,6 +17,7 @@ import { MergecardsetComponent } from './components/mergecardset/mergecardset.co
 import { AudiolistComponent } from './components/audiolist/audiolist.component';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { PlayAudio } from '../shared/classes/playaudio';
+import { Keyboard } from '@ionic-native/keyboard/ngx';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,8 @@ import { PlayAudio } from '../shared/classes/playaudio';
   ],
   providers: [
     TextToSpeech,
-    PlayAudio
+    PlayAudio,
+    Keyboard
   ]
 })
 export class TabmanagePageModule { }

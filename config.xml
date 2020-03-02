@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.quizcardsapps.personal" version="11.18" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.quizcardsapps.personal" version="11.19" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Quiz Cards</name>
     <description>Personal study cards, flashcards and quiz cards app</description>
     <author email="quizcardsapps@gmail.com" href="http://quizcardsapp.com">QuizCards Apps</author>
@@ -13,6 +13,7 @@
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
     <preference name="ScrollEnabled" value="false" />
+    <preference name="android-targetSdkVersion" value="28" />
     <preference name="android-minSdkVersion" value="19" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="SplashMaintainAspectRatio" value="true" />
@@ -99,7 +100,6 @@
     <plugin name="cordova-plugin-statusbar" spec="2.4.2" />
     <plugin name="cordova-plugin-device" spec="2.0.2" />
     <plugin name="cordova-plugin-splashscreen" spec="5.0.2" />
-    <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
     <plugin name="cordova-plugin-file" spec="6.0.1" />
     <plugin name="cordova-plugin-filepath" spec="1.5.1" />
     <plugin name="cordova-plugin-file-transfer" spec="1.7.1" />
@@ -111,5 +111,6 @@
         <variable name="BILLING_KEY" value="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv8cL9c1Iv17NKSLl6itlWlZqhqAqds1iSCEWXBWZiIQKTzmGSzWLpNL25Ewu7u9Y5jsfzGfrH+F+TY/eX9rjMSH46qKCwyarvWGr+a/M9ejnHFUx7eZz5bHtUPLGY4xEHxRx7PZysWzpMEOcm+A6g4JcDcrvIP8TkPujaRR3JvIIOp5zn5m1f1JjbmUbR1NhKcnmhPvBjdDIEeHkpMqKOh8whB7MLVlBlU1C/KsBjLH5hXbqZ12Fw9s9W3AJLpbWroxQj0E95Gcs2ieAwiZgrTRsE3thnY7PZCflWW1+zcw0c1X2wt7E0BLGevhzgodCCOXDiSTh/RvRB7ql6+wn9QIDAQAB" />
     </plugin>
     <plugin name="cordova-plugin-network-information" spec="2.0.1" />
-    <engine name="android" spec="7.1.4" />
+    <plugin name="cordova-plugin-ionic-keyboard" spec="^2.1.3" />
+    <engine name="android" spec="^7.1.4" />
 </widget>

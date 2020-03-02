@@ -7,6 +7,7 @@ import { QuiztypeComponent } from '../components/quiztype/quiztype.component';
 import { Storage } from '@ionic/storage';
 import { Router } from '@angular/router';
 import { Achievements } from 'src/app/shared/classes/achievements';
+import { Keyboard } from '@ionic-native/keyboard/ngx';
 
 @Component({
   selector: 'app-home',
@@ -26,7 +27,8 @@ export class HomePage implements OnInit {
     private alert: AlertController,
     private router: Router,
     private storage: Storage,
-    private ach: Achievements
+    private ach: Achievements,
+    private keyboard: Keyboard
   ) { }
 
   async ngOnInit() {
@@ -40,8 +42,9 @@ export class HomePage implements OnInit {
     if (!this._showFilter) this.filteredQuizzes = this.Quizzes;
   }
   filterSets(term) {
-    this.filteredQuizzes = this.Quizzes.filter(function(q) {
-      return q.quizname.includes(term);
+    this.keyboard.hide();
+    this.filteredQuizzes = this.Quizzes.filter((q) => {
+      return q.quizname.toLowerCase().includes(term.toLowerCase());
     });
   }
 

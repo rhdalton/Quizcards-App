@@ -13,6 +13,7 @@ import { CardsetpopoverComponent } from '../cardsetpopover/cardsetpopover.compon
 import { MergecardsetComponent } from '../mergecardset/mergecardset.component';
 import { NetworkService } from 'src/app/services/network.service';
 import { File } from '@ionic-native/File/ngx';
+import { Keyboard } from '@ionic-native/keyboard/ngx';
 
 @Component({
   selector: 'app-quizcards',
@@ -42,10 +43,12 @@ export class QuizcardsComponent implements OnInit {
     private loader: LoadingController,
     private modal: ModalController,
     private network: NetworkService,
-    private File: File
+    private file: File,
+    private keyboard: Keyboard,
+    private navCtrl: NavController
   ) {
     this._quizId = this.route.snapshot.params.quizid;
-    this._cardsloaded = false;    
+    this._cardsloaded = false;
   }
 
   async ngOnInit() {
@@ -84,9 +87,11 @@ export class QuizcardsComponent implements OnInit {
       }).then(a => a.present());
       return;
     } else if (pos !== null) {
-      this.router.navigate(['/tabs/tabmanage/card', this._quizId, 0, pos]);
+      this.navCtrl.navigateForward('/tabs/tabmanage/card/' + this._quizId + '/0/' + pos, { animated: false, });
+      // his.router.navigate(['/tabs/tabmanage/card', this._quizId, 0, pos]);
     } else {
-      this.router.navigate(['/tabs/tabmanage/card', this._quizId]);
+      this.navCtrl.navigateForward('/tabs/tabmanage/card/' + this._quizId, { animated: false, });
+      // this.router.navigate(['/tabs/tabmanage/card', this._quizId]);
     }
   }
 
@@ -98,8 +103,10 @@ export class QuizcardsComponent implements OnInit {
   }
 
   filterCards(term) {
-    this.filteredCards = this.allCards.filter(function(card) {
-      return card.c_text.includes(term) || card.c_study.includes(term);
+    this.keyboard.hide();
+    term = term.toLowerCase();
+    this.filteredCards = this.allCards.filter((card) => {
+      return card.c_text.toLowerCase().includes(term) || card.c_study.toLowerCase().includes(term);
     });
   }
 
@@ -198,7 +205,7 @@ export class QuizcardsComponent implements OnInit {
   }
 
   async exportToDevice() {
-    this.pop.dismiss();    
+    this.pop.dismiss();
 
     this.alert.create({
       header: 'Export to Device',
@@ -211,14 +218,14 @@ export class QuizcardsComponent implements OnInit {
   }
 
   doExport() {
-    //console.log('export: ', this.File.externalApplicationStorageDirectory);
-    let quizJson = {
+    // console.log('export: ', this.File.externalApplicationStorageDirectory);
+    const quizJson = {
       quizname: this.Quiz.quizname,
       quizcolor: this.Quiz.quizcolor,
       cards: []
-    }
+    };
 
-    for(const c of this.allCards) {
+    for (const c of this.allCards) {
       const cardJson = {
         txt: c.c_text,
         subtxt: c.c_subtext,
@@ -230,14 +237,14 @@ export class QuizcardsComponent implements OnInit {
     }
 
     const quizJsonString = JSON.stringify(quizJson);
- 
-    var filename = this.Quiz.quizname.replace(/[^\W]/gi, '') || 'unnamed';
+
+    let filename = this.Quiz.quizname.replace(/[^\W]/gi, '') || 'unnamed';
     filename += ".qcs";
-    this.File.writeFile(this.File.externalApplicationStorageDirectory, filename, quizJsonString, {replace: true}); 
+    this.file.writeFile(this.file.externalApplicationStorageDirectory, filename, quizJsonString, {replace: true});
 
     this.alert.create({
       header: 'Export to Device',
-      message: 'This set has been exported to ' + this.File.externalApplicationStorageDirectory,
+      message: 'This set has been exported to ' + this.file.externalApplicationStorageDirectory,
       buttons: [
         { text: 'Ok', handler: () => this.alert.dismiss() }
       ]

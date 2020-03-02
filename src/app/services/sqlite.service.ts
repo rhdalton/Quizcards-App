@@ -385,8 +385,8 @@ export class SqliteService {
         for (let i = 0; i < cards.length; i++) {
 
           if (orderId !== null) _orderId = orderId + 1;
-          else if (incr) _orderId = quiz.cardcount + 1 + i;          
-          else _orderId = cards[i].cardorder;          
+          else if (incr) _orderId = quiz.cardcount + 1 + i;
+          else _orderId = cards[i].cardorder;
 
           const newCard = [
             cards[i].id,

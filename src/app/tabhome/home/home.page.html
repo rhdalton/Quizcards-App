@@ -1,9 +1,9 @@
 <ion-content>
   <div *ngIf="_homeLoaded">
-    <div class="search-icon" (click)="showFilter()"><img src="assets/icon/search.svg"></div>
+    <div *ngIf="Quizzes.length > 7" class="search-icon" (click)="showFilter()"><img src="assets/icon/search.svg"></div>
 
     <ion-card-content *ngIf="_showFilter" style="margin-top: -2px">
-      <input #searchTerm (keyup)="filterSets(searchTerm.value)" type="text" class="input-text bgfocus" placeholder="Filter sets by typing name here...">
+      <input #searchTerm (keyup.enter)="filterSets(searchTerm.value)" type="text" class="input-text bgfocus" placeholder="Filter sets by typing name here...">
     </ion-card-content>
 
     <ion-card *ngFor="let q of filteredQuizzes" class="qcard std-card {{q.quizcolor}}">

@@ -138,8 +138,7 @@ export class QuizformComponent {
       }
     }
 
-    // this.router.navigateByUrl('/tabs/tabmanage/cards/' + this.Quiz.id);
-    this.nav.navigateForward('/tabs/tabmanage/cards/' + this.Quiz.id);
+    this.nav.navigateForward('/tabs/tabmanage/cards/' + this.Quiz.id, { animated: false, });
   }
 
   toggleMoreoptions() {

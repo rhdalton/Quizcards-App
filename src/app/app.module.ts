@@ -17,7 +17,7 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { IonicStorageModule } from '@ionic/storage';
 import { Network } from '@ionic-native/network/ngx';
-
+import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -25,6 +25,13 @@ import { SharedModule } from './shared/shared.module';
 import { Achievements } from './shared/classes/achievements';
 import { AchievealertComponent } from './shared/components/achievealert/achievealert.component';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
+
+export class CustomHammerConfig extends HammerGestureConfig  {
+  overrides = {
+      'pinch': { enable: false },
+      'rotate': { enable: false }
+  } as any;
+}
 
 @NgModule({
   declarations: [
@@ -57,7 +64,8 @@ import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
     WebView,
     Achievements,
     Network,
-    TextToSpeech
+    TextToSpeech,
+    { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig }
   ],
   bootstrap: [AppComponent]
 })
