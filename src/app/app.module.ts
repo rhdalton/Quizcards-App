@@ -25,6 +25,7 @@ import { SharedModule } from './shared/shared.module';
 import { Achievements } from './shared/classes/achievements';
 import { AchievealertComponent } from './shared/components/achievealert/achievealert.component';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 export class CustomHammerConfig extends HammerGestureConfig  {
   overrides = {
@@ -49,7 +50,8 @@ export class CustomHammerConfig extends HammerGestureConfig  {
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule.enablePersistence(),
     AngularFireAuthModule,
-    AngularFireStorageModule
+    AngularFireStorageModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
     StatusBar,
