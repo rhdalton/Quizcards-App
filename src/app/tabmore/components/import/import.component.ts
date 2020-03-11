@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { File } from '@ionic-native/File/ngx';
+import { AlertController, Platform } from '@ionic/angular';
+import { Quiz } from 'src/app/models/quiz';
+import { Card } from 'src/app/models/card';
+import { QuizcardsExport } from 'src/app/shared/classes/quizcardsexport';
 
 @Component({
   selector: 'quizcards-import',
@@ -7,38 +11,46 @@ import { File } from '@ionic-native/File/ngx';
   styleUrls: ['./import.component.scss'],
 })
 export class ImportComponent implements OnInit {
+  _isLoaded = false;
   backups = [];
 
-  constructor(private File: File) { }
+  constructor(
+    private file: File,
+    private platform: Platform,
+    private alert: AlertController,
+    private importquiz: QuizcardsExport
+  ) { }
 
   ngOnInit() {
-    this.loadBackups('');
+    this.loadBackups();
   }
 
-  async loadBackups(dir) {    
-    await this.File.listDir(this.File.externalRootDirectory, dir)
-      .then(entries => {
-
-        for(let i = 0; i < entries.length; i++) {
-          if(!entries[i]['isDirectory']) {
-            const qcs_index = entries[i]['fullPath'].lastIndexOf('.qcs');
-            if(qcs_index > -1 && qcs_index + 4 === entries[i]['fullPath'].length) {
-              this.backups.push(entries[i]);
+  async loadBackups() {
+    if (this.platform.is('cordova')) {
+      this.file.checkDir(this.file.externalRootDirectory, 'QuizCardsApp')
+        .then(async () => {
+          const files = await this.file.listDir(this.file.externalRootDirectory, 'QuizCardsApp');
+          files.forEach(async (f) => {
+            const extn = f.fullPath.split(".").pop();
+            if (f.isFile && extn === 'qcs') {
+              const data = await this.file.readAsText(this.importquiz._exportDir, f.name);
+              const quizdata = JSON.parse(data);
+              if (quizdata.quizname && quizdata.cards.length > 0) {
+                this.backups.push({ quizname: quizdata.quizname, quizcolor: quizdata.quizcolor, cardcount: quizdata.cards.length, quizfile: f.name });
+              }
             }
-          } else {
-            // var children_data = await this.listDirHelper(entries[i]['nativeURL'],entries[i]['name']);
-            // if(children_data !== false){
-            //   current_folder['children'].push(children_data);
-            // }
-          }
-        }
-      })
-      .catch((err) => {
-          console.log('error in listing directory', err);
-      });
+          });
+          this._isLoaded = true;
+        })
+        .catch(() => {
+          this._isLoaded = true;
+        });
+    } else {
+      this._isLoaded = true;
+    }
   }
 
-  restoreBackup(b) {
-    
+  importCardset(backup) {
+    this.importquiz.importCardset(backup);
   }
 }

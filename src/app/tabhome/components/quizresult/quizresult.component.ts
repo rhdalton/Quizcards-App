@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { PopoverController } from '@ionic/angular';
 import { QuiztypeComponent } from '../quiztype/quiztype.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-quizresult',
@@ -19,12 +20,18 @@ export class QuizresultComponent implements OnInit {
   showResults = false;
 
   constructor(
-    private pop: PopoverController
+    private pop: PopoverController,
+    private router: Router
   ) { }
 
   ngOnInit() {
     this.percentCorrect = Math.round(this.totalCorrect / this.totalcards * 100);
     this.dasharray = this.percentCorrect + ', 100';
+  }
+
+  replayStudy() {
+    this.reload = (this.reload) ? '' : '1';
+    this.router.navigate(['/tabs/tabhome/study', this.quizId, this.reload]);
   }
 
   quizTypePopover(ev) {

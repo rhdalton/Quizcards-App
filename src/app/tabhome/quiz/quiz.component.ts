@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, Renderer2 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SqliteService } from 'src/app/services/sqlite.service';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { AppSettings } from 'src/app/models/appsettings';
@@ -8,10 +8,11 @@ import { Card } from 'src/app/models/card';
 import { trigger, transition, animate, style } from '@angular/animations';
 import { DOCUMENT } from '@angular/common';
 import { QuiztypeComponent } from '../components/quiztype/quiztype.component';
-import { PopoverController, Platform } from '@ionic/angular';
+import { PopoverController, Platform, AlertController } from '@ionic/angular';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { QuizClass } from 'src/app/shared/classes/quiz';
 import { Achievements } from 'src/app/shared/classes/achievements';
+import { PlayAudio } from 'src/app/shared/classes/playaudio';
 
 @Component({
   selector: 'app-quiz',
@@ -70,9 +71,11 @@ export class QuizComponent implements OnInit {
     private app: AppdataClass,
     private render: Renderer2,
     private platform: Platform,
-    private tts: TextToSpeech,
     private quizClass: QuizClass,
-    private ach: Achievements
+    private ach: Achievements,
+    private audio: PlayAudio,
+    private router: Router,
+    private alert: AlertController
   ) {
     this.quizId = this.route.snapshot.params.quizid;
     this.quizType = this.route.snapshot.params.type;
@@ -121,6 +124,19 @@ export class QuizComponent implements OnInit {
     this.allCards = this.allCards.filter((card) => {
       return card.is_hidden !== 1;
     });
+
+    if (this.allCards.length === 0) {
+      this.alert.create({
+        header: 'No Quiz Cards',
+        message: 'No cards avaliable to quiz. Check to make sure all cards are not "hidden".',
+        buttons: [
+          { text: 'OK' }
+        ]
+      }).then(a => a.present());
+      this.router.navigate(['/tabs/tabhome']);
+      return;
+    }
+
     if (this.Quiz.quizLimit < this.allCards.length) this.Cards = this.allCards.slice(0, this.Quiz.quizLimit);
     else this.Cards = this.allCards;
 
@@ -175,6 +191,8 @@ export class QuizComponent implements OnInit {
     if (this.madeChoice) return;
     this.madeChoice = true;
 
+    this.audio.endAudio();
+
     clearInterval(this.interval);
 
     if (choice === null) {
@@ -213,6 +231,7 @@ export class QuizComponent implements OnInit {
 
     if (answer !== null && answer.typeinAnswer.trim() === '') return;
 
+    this.audio.endAudio();
     clearInterval(this.interval);
 
     if (answer === null) {
@@ -307,31 +326,6 @@ export class QuizComponent implements OnInit {
         return;
       }
     }, 1000);
-  }
-
-  async playAudio(ms) {
-    await this.delay(ms);
-    this.audioActive = true;
-    await this.play();
-    this.audioActive = false;
-  }
-
-  play() {
-    return new Promise((res) => {
-      if (this.Card.c_audio) {
-        // this.audioCard.play();
-        // this.audioCard.onended = res;
-      } else
-      if (this.Quiz.tts !== '' && this.platform.is('cordova')) {
-        this.tts.speak({
-          text: this.Card.c_text,
-          locale: this.Quiz.tts,
-          rate: this.Quiz.ttsSpeed / 100
-        }).then(() => res());
-      } else {
-        res();
-      }
-    });
   }
 
   addToQuizResult(correct: boolean, userAnswer) {

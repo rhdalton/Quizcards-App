@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { User } from '../models/user';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular';
 import { AppSettings } from '../models/appsettings';
 import { AppdataClass } from '../shared/classes/appdata';
 import { Subscription } from 'rxjs';

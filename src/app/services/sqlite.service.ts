@@ -151,6 +151,23 @@ export class SqliteService {
     }
   }
 
+  async getQuizByName(quizName: string) {
+    // is device
+    if (this.platform.is('cordova')) {
+      this.db = await this.cdb();
+      if (this.db) {
+        const result = await this.db.executeSql("SELECT * FROM Quizzes WHERE quizname=?", [quizName]);
+        if (result.rows.length === 1) {
+          return result.rows.item(0);
+        }
+        return {};
+      }
+    } else {
+      // webstorage
+      // return await this.webstorage.getQuizById(quizId);
+    }
+  }
+
   async addQuiz(quiz: Quiz) {
     // is device
     if (this.platform.is('cordova')) {
@@ -158,7 +175,7 @@ export class SqliteService {
       if (this.db) {
         const quizArray = [
           quiz.id,
-          quiz.quizname,
+          quiz.quizname.trim(),
           quiz.quizcolor,
           quiz.switchtext,
           quiz.cardcount,
@@ -263,6 +280,39 @@ export class SqliteService {
       for (let i = 0; i < quizlist.length; i++) {
         if (quizlist[i].id === quiz.id) {
           quizlist[i] = quiz;
+          break;
+        }
+      }
+      // save quizlist
+      await this.webstorage.saveQuizList(quizlist);
+      // save individual quiz
+      await this.webstorage.saveQuizById(quiz);
+    }
+  }
+
+  async updateQuizCardCount(quiz: Quiz, cardcount: number) {
+    // is device
+    if (this.platform.is('cordova')) {
+      this.db = await this.cdb();
+      if (this.db) {
+        const quizArray = [
+          cardcount,
+          quiz.id
+        ];
+
+        await this.db.executeSql(`UPDATE Quizzes
+                      SET cardcount=?
+                          WHERE id=?`, quizArray);
+      }
+    } else {
+      // webstorage
+      // get current quizlist
+      let quizlist = await this.webstorage.getQuizlist();
+      if (!quizlist) quizlist = [];
+      // loop through quizlist to find quiz to update
+      for (let i = 0; i < quizlist.length; i++) {
+        if (quizlist[i].id === quiz.id) {
+          quizlist[i].cardcount = cardcount;
           break;
         }
       }
@@ -437,6 +487,8 @@ export class SqliteService {
           card.c_subtext,
           card.c_image,
           card.image_path,
+          card.c_audio,
+          card.audio_path,
           card.c_correct,
           card.c_study,
           card.c_substudy,
@@ -448,6 +500,8 @@ export class SqliteService {
                                     c_subtext=?,
                                     c_image=?,
                                     image_path=?,
+                                    c_audio=?,
+                                    audio_path=?,
                                     c_correct=?,
                                     c_study=?,
                                     c_substudy=?
@@ -515,7 +569,7 @@ export class SqliteService {
     if (this.platform.is('cordova')) {
       this.db = await this.cdb();
       if (this.db) {
-        const result = await this.db.executeSql('SELECT id, quiz_id, c_text, c_subtext, c_image, image_path, c_correct, c_substudy FROM Cards WHERE id=?', [cardId]);
+        const result = await this.db.executeSql('SELECT id, quiz_id, c_text, c_subtext, c_image, image_path, c_audio, audio_path, c_correct, c_substudy FROM Cards WHERE id=?', [cardId]);
         if (result.rows.length === 1) {
           return result.rows.item(0);
         }

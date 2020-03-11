@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.quizcardsapps.personal" version="11.19" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.quizcardsapps.personal" version="11.25" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Quiz Cards</name>
     <description>Personal study cards, flashcards and quiz cards app</description>
     <author email="quizcardsapps@gmail.com" href="http://quizcardsapp.com">QuizCards Apps</author>
     <content src="index.html" />
-    <access origin="*" />
+    <access origin=".*" />
     <allow-navigation href="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -112,5 +112,9 @@
     </plugin>
     <plugin name="cordova-plugin-network-information" spec="2.0.1" />
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.1.3" />
+    <plugin name="cordova-plugin-media" spec="^5.0.3" />
+    <plugin name="cordova.plugins.diagnostic" spec="^5.0.1">
+        <variable name="ANDROID_SUPPORT_VERSION" value="28.+" />
+    </plugin>
     <engine name="android" spec="^7.1.4" />
 </widget>

@@ -45,7 +45,10 @@
       </div>
         {{ i + 1 }}. 
         <img *ngIf="c.c_image && Quiz.cardview=='detail-view'" class="card-image image-small" src="{{ c.c_image }}">
-        <img *ngIf="c.c_image && Quiz.cardview=='compact-view'" src="assets/icon/uploadimage.svg" style="vertical-align:top;display:inline-block;width:25px;"> {{c.c_text}}
+        <img *ngIf="c.c_image && Quiz.cardview=='compact-view'" src="assets/icon/uploadimage.svg" style="vertical-align:top;display:inline-block;width:25px;">
+        <img *ngIf="c.c_audio" src="assets/icon/audiofile.svg" style="vertical-align:top;display:inline-block;width:23px;">
+        <span *ngIf="c.c_audio && Quiz.cardview=='detail-view'" class="sm">&nbsp; [{{c.c_audio}}]<br /></span>
+        {{c.c_text}}
       <div *ngIf="Quiz.cardview=='detail-view'" class="card-detail">{{c.c_correct}}</div>
     </ion-card-content>
   </ion-card>

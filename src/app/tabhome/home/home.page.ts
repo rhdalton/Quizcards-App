@@ -15,7 +15,7 @@ import { Keyboard } from '@ionic-native/keyboard/ngx';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
-  Quizzes: Quiz[] = [];
+  Quizzes: Quiz[];
   filteredQuizzes: Quiz[];
   _homeLoaded = false;
   _showFilter = false;
@@ -35,6 +35,7 @@ export class HomePage implements OnInit {
     // await this.storage.remove('achievements');
     // this.storage.clear();
     // this.ach.updateLocalAchievement(13, 1);
+    this.Quizzes = [];
   }
 
   showFilter() {
@@ -48,7 +49,7 @@ export class HomePage implements OnInit {
     });
   }
 
-  async ionViewWillEnter() {
+  ionViewWillEnter() {
     this.getQuizes();
   }
 

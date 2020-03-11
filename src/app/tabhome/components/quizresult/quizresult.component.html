@@ -7,7 +7,8 @@
 
     <ion-item-divider *ngIf="quizType=='study'">
       <div class="ion-item-divider-inner">
-        You've completed these study cards. Try taking quiz to see how much you remember.
+        No more study cards remaining.<br />
+        Review the study cards again or try taking quiz to see how much you remember.
       </div>
     </ion-item-divider>
     <ion-item-divider *ngIf="quizType!='study'">
@@ -34,7 +35,7 @@
       </div>
     </ion-item-divider>
     
-    <ion-item-divider routerLink="/tabs/tabhome/study/{{quizId}}{{reload!=''?'':'/1'}}">
+    <ion-item-divider (click)="replayStudy()">
       <div class="ion-item-divider-inner">
         <ion-icon name="arrow-dropright"></ion-icon> Review Study Cards<span *ngIf="quizType=='study'"> Again</span>
       </div>

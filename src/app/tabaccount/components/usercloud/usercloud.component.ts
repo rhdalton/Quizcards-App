@@ -12,6 +12,7 @@ import { FirestoreService } from 'src/app/services/firestore.service';
 import { SqliteService } from 'src/app/services/sqlite.service';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { ToastNotification } from 'src/app/shared/classes/toast';
+import { ImageService } from 'src/app/services/images.service';
 
 @Component({
   selector: 'app-usercloud',
@@ -24,6 +25,7 @@ export class UsercloudComponent implements OnDestroy {
   _limits;
   _backupId = '';
   _loader;
+  _isPro: boolean;
   User: User;
   Quizzes: FSQuiz[];
 
@@ -36,7 +38,8 @@ export class UsercloudComponent implements OnDestroy {
     private load: LoadingController,
     private router: Router,
     private alert: AlertController,
-    private toast: ToastNotification
+    private toast: ToastNotification,
+    private image: ImageService
   ) { }
 
   async ionViewWillEnter() {
@@ -68,6 +71,7 @@ export class UsercloudComponent implements OnDestroy {
 
         this.User = appUser;
         this._limits = this.app.appLimits(this.User.userStatus);
+        this._isPro = this.app.isPro(this.User.userStatus);
 
         if (this._backupId) {
           this.backupCardSet();
@@ -88,13 +92,66 @@ export class UsercloudComponent implements OnDestroy {
     this._loader.dismiss();
   }
 
+  async alertImages() {
+    return new Promise(async (res) => {
+      const a = await this.alert.create({
+        header: 'Set Contains Images',
+        message: 'This card set contains images, however images can only be backed-up with Pro Account. Do you want to continue the backup without images?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel', handler: () => { res(false); this.router.navigate(['/tabs/tabmanage/cards', this._backupId]); } },
+          { text: 'Yes', handler: () => res(true) }
+        ]
+      });
+      await a.present();
+    });
+  }
+
+  async alertAudio() {
+    return new Promise(async (res) => {
+      const a = await this.alert.create({
+        header: 'Set Contains Audio',
+        message: 'Audio clips cannot be backed-up on cloud. However, the cards will save the location of audio on local device. ' +
+        'If the audio files remain on your device, you will be able to download this card set and still play the audio clips.',
+        buttons: [
+          { text: 'Cancel', role: 'cancel', handler: () => res(false) },
+          { text: 'Continue', handler: () => res(true) }
+        ],
+        backdropDismiss: false
+      });
+      await a.present();
+    });
+  }
+
   async backupCardSet() {
+
+    let hasImages = false;
+    let hasAudio = false;
 
     // get the quiz to back up
     const quiz: Quiz = await this.sqlite.getQuiz(this._backupId);
+    const cardsToSync: Card[] = await this.sqlite.getQuizCards(this._backupId);
+
+    for (let i = 0; i < cardsToSync.length; i++) {
+      if (cardsToSync[i].c_image !== '') {
+        hasImages = true;
+        if (!this._isPro) {
+          cardsToSync[i].c_image = '';
+          cardsToSync[i].image_path = '';
+        }
+      }
+      if (cardsToSync[i].c_audio !== '') hasAudio = true;
+    }
 
     this._loader.dismiss();
 
+    if (!this._isPro && hasImages && !await this.alertImages()) {
+      this.router.navigate(['/tabs/tabmanage/cards', this._backupId]);
+      return;
+    }
+    if (hasAudio && !await this.alertAudio()) {
+      this.router.navigate(['/tabs/tabmanage/cards', this._backupId]);
+      return;
+    }
     // if cloudId exists, then ask if they want to replace existing backup
     if (quiz.cloudId !== '') {
       this.alert.create({
@@ -102,7 +159,7 @@ export class UsercloudComponent implements OnDestroy {
         message: 'This card set already exists on your cloud account. Do you want to update the cloud set with this one?',
         buttons: [
           { text: 'Cancel', role: 'cancel', handler: () => this.router.navigate(['/tabs/tabmanage/cards', this._backupId]) },
-          { text: 'Yes', handler: () => this.syncCardSet(quiz, true) }
+          { text: 'Yes', handler: () => this.syncCardSet(quiz, cardsToSync, true) }
         ]
       }).then(a => a.present());
       return;
@@ -123,10 +180,10 @@ export class UsercloudComponent implements OnDestroy {
     }
 
     // if everything ok, sync set
-    this.syncCardSet(quiz);
+    this.syncCardSet(quiz, cardsToSync);
   }
 
-  async syncCardSet(quiz: Quiz, resync = false) {
+  async syncCardSet(quiz: Quiz, cards: Card[], resync = false) {
 
     this._loader = await this.load.create({ message: 'Backing up to cloud...' });
     this._loader.present();
@@ -134,13 +191,14 @@ export class UsercloudComponent implements OnDestroy {
     const cloudQuizObj = this.newCloudQuizObj(quiz);
 
     if (resync) {
+      this.firestore.deleteStorageFiles(quiz.cloudId, 'cloud');
       await this.firestore.updateCloudCardSet(cloudQuizObj, 'user_cardsets');
-      await this.syncCardSetCards(quiz.cloudId);
+      await this.syncCardSetCards(quiz.cloudId, cards);
     } else {
       const newCloudQuiz = await this.firestore.saveCloudCardSet(cloudQuizObj, 'user_cardsets');
       if (newCloudQuiz.id) {
         await this.sqlite.updateQuizFirestoreId(quiz.id, newCloudQuiz.id, 'cloud');
-        await this.syncCardSetCards(newCloudQuiz.id);
+        await this.syncCardSetCards(newCloudQuiz.id, cards);
       }
     }
 
@@ -153,9 +211,9 @@ export class UsercloudComponent implements OnDestroy {
     this.router.navigate(['/tabs/tabmanage/cards', this._backupId]);
   }
 
-  async syncCardSetCards(cloudId) {
-    const cardsToSync = await this.sqlite.getQuizCards(this._backupId);
-    await this.firestore.saveCloudSetCards(cloudId, cardsToSync, 'user_cardsets');
+  async syncCardSetCards(cloudId, cards) {
+    const saveImages = (this.User.userStatus === 'pro') ? true : false;
+    await this.firestore.saveCloudSetCards(cloudId, cards, 'user_cardsets', saveImages);
   }
 
   newCloudQuizObj(quiz: Quiz) {
@@ -210,7 +268,7 @@ export class UsercloudComponent implements OnDestroy {
       return;
     }
 
-    const cloudCards = (await this.firestore.getCloudSetCards(cloudId, 'user_cardsets'))
+    let cloudCards = (await this.firestore.getCloudSetCards(cloudId, 'user_cardsets'))
       .docs.map(e => {
         return {
           ...e.data()
@@ -238,6 +296,8 @@ export class UsercloudComponent implements OnDestroy {
       await this.sqlite.addQuiz(deviceQuiz);
     }
 
+    if (this.User.userStatus === 'pro') cloudCards = await this.image.downloadImagesFromCloudStorage(cloudId, cloudCards, 'cloud');
+
     await this.sqlite.addCards(cloudCards, false);
 
     this._loader.dismiss();
@@ -264,6 +324,7 @@ export class UsercloudComponent implements OnDestroy {
 
     await this.firestore.deleteCloudSetCards(cloudId, 'user_cardsets');
     await this.firestore.deleteCloudCardSet(cloudId, 'user_cardsets');
+    this.firestore.deleteStorageFiles(cloudId, 'cloud');
 
     for (let i = 0; i < this.Quizzes.length; i++) {
       if (this.Quizzes[i].cloudId === cloudId) {

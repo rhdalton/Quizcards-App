@@ -19,9 +19,9 @@ import { NetworkService } from 'src/app/services/network.service';
     <ion-item-divider *ngIf="isBackable" (click)="backupToCloud()">
         <img src="assets/icon/backup.svg"> Back-up
     </ion-item-divider>
-    <!--<ion-item-divider (click)="exportToDevice()">
+    <ion-item-divider (click)="exportToDevice()">
         <img src="assets/icon/export.svg"> Export
-    </ion-item-divider>-->
+    </ion-item-divider>
     <ion-item-divider *ngIf="isShareable" (click)="share()">
         <img src="assets/icon/share.svg"> Share
     </ion-item-divider>

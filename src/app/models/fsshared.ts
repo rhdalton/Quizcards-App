@@ -1,16 +1,16 @@
 
 export interface FSShared {
-  id: string;
-  quizname: string;
-  quizcolor: string;
-  cardcount: number;
-  tts: string;
-  sharecode: string;
-  userId: string;
-  quizdownloads: number;
   shareId: string;
-  sharetime: number;
-  sharedatetime: string;
-  creator_name: string;
-  share_to: string;
+  quizId: string;
+  quizName: string;
+  cardCount: number;
+  quizdownloads: number;
+  shareCode: string;
+  shareUserId: string;
+  shareUserName: string;
+  shareTime: number;
+  shareDatetime: string;
+  shareTo: string;
+  quizData: string;
+  hasImages: boolean;
 }

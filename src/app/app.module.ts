@@ -26,6 +26,7 @@ import { Achievements } from './shared/classes/achievements';
 import { AchievealertComponent } from './shared/components/achievealert/achievealert.component';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { Media } from '@ionic-native/media/ngx';
 
 export class CustomHammerConfig extends HammerGestureConfig  {
   overrides = {
@@ -44,7 +45,7 @@ export class CustomHammerConfig extends HammerGestureConfig  {
     SharedModule,
     BrowserModule,
     BrowserAnimationsModule,
-    IonicModule.forRoot(),
+    IonicModule.forRoot({animated: false}),
     IonicStorageModule.forRoot(),
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
@@ -67,7 +68,8 @@ export class CustomHammerConfig extends HammerGestureConfig  {
     Achievements,
     Network,
     TextToSpeech,
-    { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig }
+    { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig },
+    Media
   ],
   bootstrap: [AppComponent]
 })

@@ -18,6 +18,7 @@ import { AudiolistComponent } from './components/audiolist/audiolist.component';
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { PlayAudio } from '../shared/classes/playaudio';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
+import { Diagnostic } from '@ionic-native/diagnostic/ngx';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { Keyboard } from '@ionic-native/keyboard/ngx';
   providers: [
     TextToSpeech,
     PlayAudio,
-    Keyboard
+    Keyboard,
+    Diagnostic
   ]
 })
 export class TabmanagePageModule { }

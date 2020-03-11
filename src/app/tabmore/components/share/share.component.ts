@@ -12,6 +12,8 @@ import { firestore } from 'firebase/app';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastNotification } from 'src/app/shared/classes/toast';
+import { QuizcardsExport } from 'src/app/shared/classes/quizcardsexport';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-share',
@@ -19,10 +21,12 @@ import { ToastNotification } from 'src/app/shared/classes/toast';
   styleUrls: ['./share.component.scss'],
 })
 export class ShareComponent implements OnInit {
+  _userSub: Subscription;
   _quizId: string;
   _isPro = false;
   _app: AppSettings;
   _hasImages = false;
+  _hasAudio = false;
   _loader;
   User: User;
   Quiz: Quiz;
@@ -37,16 +41,18 @@ export class ShareComponent implements OnInit {
     private alert: AlertController,
     private load: LoadingController,
     private firestoreService: FirestoreService,
-    private toast: ToastNotification
+    private toast: ToastNotification,
+    private quizjson: QuizcardsExport
   ) {
     this._quizId = this.route.snapshot.params.quizid;
   }
 
   ngOnInit() {
-    this.auth.appUser$.subscribe(appUser => {
+    this._userSub = this.auth.appUser$.subscribe(appUser => {
       if (!appUser) this.User = null;
       else {
         this.User = appUser;
+        // this.toast.loadToast('status: ' + this.User.userStatus);
         this._isPro = this.app.isPro(this.User.userStatus);
       }
     });
@@ -59,23 +65,29 @@ export class ShareComponent implements OnInit {
 
   async shareToFriends() {
 
-    // check if user is Pro, if not, check if cards have images
+    // check if cards have images
     const cards: Card[] = await this.sqlite.getQuizCards(this.Quiz.id);
-    if (!this._isPro) {
-      for (let i = 0; i < cards.length; i++) {
-        if (cards[i].c_image && cards[i].c_image !== '') {
-          this._hasImages = true;
-          break;
-        }
-      }
+    for (let i = 0; i < cards.length; i++) {
+      if (cards[i].c_image && cards[i].c_image !== '') this._hasImages = true;
+      if (cards[i].c_audio && cards[i].c_audio !== '') this._hasAudio = true;
+      if (this._hasImages && this._hasAudio) break;
     }
 
-    if (this._hasImages) {
+    if (!this._isPro && this._hasImages) {
       this.alert.create({
-        header: 'Pro Account Required',
-        message: 'Only QuizCard Pro accounts can share Cards with images. Please upgrade to Pro to share this QuizCard set.',
+        header: 'Share Image Cards',
+        message: 'This QuizCard set contains images. Images can only be shared with a Pro Account. Please upgrade to Pro to share this QuizCard set.',
         buttons: ['OK']
       }).then(a => a.present());
+      return;
+    }
+
+    if (await this.notifyAudio()) {
+      for (let i = 0; i < cards.length; i++) {
+        cards[i].c_audio = '';
+        cards[i].audio_path = '';
+      }
+    } else {
       return;
     }
 
@@ -89,44 +101,36 @@ export class ShareComponent implements OnInit {
 
     } else {
       // get current shared quiz if exists
-      const sharedQuiz = (await this.firestoreService.getFirestoreQuiz(this.Quiz.shareId, 'user_shared_quizzes')).data() as FSShared;
+      const sharedQuiz = (await this.firestoreService.getFirestoreQuiz(this.Quiz.shareId, 'user_shared_cardsets')).data() as FSShared;
 
       console.log('shared quiz', sharedQuiz);
 
       if (!sharedQuiz) {
 
         // if sharequiz not found, then already deleted, treat like new share quiz
-        this.uploadNewShareQuiz(cards);
+        await this.uploadNewShareQuiz(cards);
 
       } else {
         // else shared quiz found
-        const expiredTime = firestore.Timestamp.now().seconds - 172800; // 48 hrs in seconds
 
-        if (sharedQuiz.sharetime > expiredTime) {
-
-          this._loader.dismiss();
-          // active shared quiz found, ask if they want to update it
-          console.log('active shared quiz found');
-          this.alert.create({
-            header: 'Already Sharing',
-            message: 'This QuizCard Set is already being shared. Do you want to update & re-share this Set? This will create a new Share Code that you\'ll need to send to your friends.',
-            buttons: [
-              { text: 'Cancel', role: 'cancel' },
-              { text: 'Yes', handler: async () => {
-                  this._loader = await this.load.create({ message: 'Updating shared set...' });
-                  this._loader.present();
-                  this.updateCurrentSharedSet(sharedQuiz);
-                }
+        this._loader.dismiss();
+        // active shared quiz found, ask if they want to update it
+        console.log('active shared quiz found');
+        this.alert.create({
+          header: 'Already Sharing',
+          message: 'This QuizCard Set is already being shared. Do you want to update & re-share this Set? This will create a new Share Code that you\'ll need to send to your friends.',
+          buttons: [
+            { text: 'Cancel', role: 'cancel' },
+            { text: 'Yes', handler: async () => {
+                this._loader = await this.load.create({ message: 'Updating shared set...' });
+                this._loader.present();
+                this.updateCurrentSharedSet(cards);
               }
-            ]
-          })
-          .then(a => a.present());
-          return;
-
-        } else {
-          // share quiz exipred, update new share
-          this.updateCurrentSharedSet(sharedQuiz);
-        }
+            }
+          ]
+        })
+        .then(a => a.present());
+        return;
       }
     }
   }
@@ -134,48 +138,65 @@ export class ShareComponent implements OnInit {
   async uploadNewShareQuiz(cards: Card[]) {
     // IF NEW SHARE QUIZ
     this.shareCode = this.makeShareCode(8);
-    const newShareQuiz: FSShared = this.createShareQuizObject(this.Quiz);
 
-    const sharedSet = await this.firestoreService.saveCloudCardSet(newShareQuiz, 'user_shared_quizzes');
+    const newShareQuiz: FSShared = this.createShareQuizObject(cards);
+
+    const sharedSet = await this.firestoreService.saveCloudCardSet(newShareQuiz, 'user_shared_cardsets');
     if (sharedSet.id) {
-      this.firestoreService.saveCloudSetCards(sharedSet.id, cards, 'user_shared_quizzes', true);
       await this.sqlite.updateQuizFirestoreId(this.Quiz.id, sharedSet.id, 'share');
+      for (let i = 0; i < cards.length; i++) {
+        if (cards[i].c_image && cards[i].c_image !== '') {
+          this.firestoreService.uploadStorageImage(sharedSet.id, cards[i], 'shared');
+        }
+      }
     }
 
     this._loader.dismiss();
     this.shareComplete = true;
   }
 
-  async updateCurrentSharedSet(sharedQuiz: FSShared) {
-
-    const cards = await this.sqlite.getQuizCards(sharedQuiz.id);
+  async updateCurrentSharedSet(cards: Card[]) {
 
     this.shareCode = this.makeShareCode(8);
-    const updateShareQuiz: FSShared = this.createShareQuizObject(sharedQuiz);
+    const updateShareQuiz: FSShared = this.createShareQuizObject(cards);
 
-    await this.firestoreService.updateCloudCardSet(updateShareQuiz, 'user_shared_quizzes');
-    await this.firestoreService.saveCloudSetCards(sharedQuiz.shareId, cards, 'user_shared_quizzes', true);
+    await this.firestoreService.updateCloudCardSet(updateShareQuiz, 'user_shared_cardsets');
+    // await this.firestoreService.saveCloudSetCards(sharedQuiz.shareId, cards, 'user_shared_quizzes', true);
 
     this._loader.dismiss();
     this.shareComplete = true;
   }
 
-  createShareQuizObject(quiz: any) {
+  createShareQuizObject(cards: Card[]) {
+
     return {
-      id: quiz.id,
-      quizname: quiz.quizname,
-      quizcolor: quiz.quizcolor,
-      cardcount: quiz.cardcount,
-      tts: quiz.tts,
-      sharecode: this.shareCode,
-      userId: (this.User.uid) ? this.User.uid : '',
+      shareId: (this.Quiz.shareId) ? this.Quiz.shareId : '',
+      quizId: this.Quiz.id,
+      quizName: this.Quiz.quizname,
+      cardCount: this.Quiz.cardcount,
       quizdownloads: 0,
-      shareId: (quiz.shareId) ? quiz.shareId : '',
-      sharetime: firestore.Timestamp.now().seconds,
-      sharedatetime: firestore.Timestamp.now().toDate().toString(),
-      creator_name: (this.User.uid) ? this.User.displayName : '',
-      share_to: ''
+      shareCode: this.shareCode,
+      shareUserId: (this.User && this.User.uid) ? this.User.uid : '',
+      shareUserName: (this.User && this.User.uid) ? this.User.displayName : '',
+      shareTime: firestore.Timestamp.now().seconds,
+      shareDatetime: firestore.Timestamp.now().toDate().toString(),
+      shareTo: '',
+      quizData: this.quizjson.quizToJson(this.Quiz, cards),
+      hasImages: this._hasImages
     } as FSShared;
+  }
+
+  async notifyAudio() {
+    return new Promise((res, rej) => {
+      this.alert.create({
+        header: 'Audio Cards',
+        message: 'This QuizCard set contains audio clips. Audio files cannot be shared. Do you still want to share this set without the audio clips?',
+        buttons: [
+          { text: "Cancel", role: "cancel", handler: () => res(false) },
+          { text: "YES", handler: () => res(true) }
+        ]
+      }).then(a => a.present());
+    });
   }
 
   async copytoclipboard() {

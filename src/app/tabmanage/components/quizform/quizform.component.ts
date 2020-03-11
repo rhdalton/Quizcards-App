@@ -29,7 +29,6 @@ export class QuizformComponent {
     private router: Router,
     private sqlite: SqliteService,
     private app: AppdataClass,
-    private nav: NavController,
     private ach: Achievements
   ) {
     this.ttsfield = [
@@ -138,7 +137,7 @@ export class QuizformComponent {
       }
     }
 
-    this.nav.navigateForward('/tabs/tabmanage/cards/' + this.Quiz.id, { animated: false, });
+    this.router.navigate(['/tabs/tabmanage/cards/', this.Quiz.id]);
   }
 
   toggleMoreoptions() {

@@ -1,5 +1,5 @@
 <ion-content>
-  <div *ngIf="_homeLoaded">
+  <ng-container *ngIf="_homeLoaded">
     <div *ngIf="Quizzes.length > 7" class="search-icon" (click)="showFilter()"><img src="assets/icon/search.svg"></div>
 
     <ion-card-content *ngIf="_showFilter" style="margin-top: -2px">
@@ -17,18 +17,15 @@
         </div>
       </ion-card-content>
     </ion-card>
-  </div>
-  <div *ngIf="Quizzes">
-    <ion-card *ngIf="Quizzes.length==0" class="alert-notify">
-      <ion-card-content dir="ltr">
-        No QuizCard sets found. Click the "CREATE" tab to create a new set.
-      </ion-card-content>
-    </ion-card>
-    <ion-card *ngIf="_showFilter && filteredQuizzes.length==0" class="alert-notify">
-      <ion-card-content dir="ltr">
-        No QuizCard sets match your search.
-      </ion-card-content>
-    </ion-card>
-  </div>
-
+  </ng-container>
+  <ion-card *ngIf="_homeLoaded && Quizzes.length == 0" class="alert-notify">
+    <ion-card-content dir="ltr">
+      No QuizCard sets found. Click the "CREATE" tab to create a new set.
+    </ion-card-content>
+  </ion-card>
+  <ion-card *ngIf="_showFilter && filteredQuizzes.length==0" class="alert-notify">
+    <ion-card-content dir="ltr">
+      No QuizCard sets match your search.
+    </ion-card-content>
+  </ion-card>
 </ion-content>

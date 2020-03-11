@@ -117,7 +117,16 @@ ion-item-divider {
   min-height:0;
 }
 .right {
-  float:right;
+  float: right;
+}
+
+.fixed-bottom {
+  position:fixed;
+  bottom:0;
+  
+  -webkit-box-shadow: 0px -1px 5px 0px rgba(189,189,189,1);
+-moz-box-shadow: 0px -1px 5px 0px rgba(189,189,189,1);
+box-shadow: 0px -1px 5px 0px rgba(189,189,189,1);
 }
 
 .color-white { color: $card-white-color; }
@@ -127,6 +136,8 @@ ion-item-divider {
 .color-yellow { color: $card-white-color; }
 .color-purple { color: $card-white-color; }
 .color-orange { color: $card-white-color; }
+
+.bg-light { background:#f2f2f2 }
 
 .quiz-color-white {
   border: 1px solid lighten( $card-white-color, 20%);
@@ -227,6 +238,14 @@ ion-button {
   font-size:16px;
   &.small {
     font-size:11px;
+  }
+}
+
+.scroll-list {
+  overflow-y: scroll;
+  &.audio-scroll {
+    height: calc(100vh - 110px);
+    padding-bottom: 48px;
   }
 }
 
@@ -334,6 +353,9 @@ ion-button {
   .card-image {
     max-height:200px;  
     object-fit: contain;
+    &.study-center {
+      margin: 0 auto;
+    }
     &.image-small {
       width:auto;
       max-height:80px;
@@ -350,8 +372,15 @@ ion-button {
     width: 40px;
     height: 30px;
     background: url('assets/icon/audiofile.svg') right no-repeat;
-    background-size: 27px;
+    background-size: 30px;
     margin-right: 5px;
+  }
+  .noaudiofile {
+    margin-top: 12px;
+    background: url('assets/icon/noaudiofile.svg') left no-repeat;
+    background-size: 18px;
+    padding-left: 22px;
+    float: right;
   }
   .upload-image {    
     display: inline-block;
@@ -366,7 +395,7 @@ ion-button {
     z-index:100;
     position:absolute;
     bottom:4px;
-    right:3px;
+    right:0;
     width:40px;
     height:30px;
     background:url('assets/icon/uploadimage.svg') right no-repeat;
@@ -592,14 +621,20 @@ ion-button {
     display:inline-block;
     padding:15px;
     background:url('assets/icon/cloud-download.svg') top no-repeat;
-    background-size: 26px;
-    margin-right:14px;
+    background-size: 26px;    
+  }
+  .import-set {
+    display:inline-block;
+    padding:15px;
+    background:url('assets/icon/import.svg') top no-repeat;
+    background-size: 20px;    
   }
   .delete-set {
     display:inline-block;
     padding:15px;
     background:url('assets/icon/delete-from-cloud.svg') top no-repeat;
     background-size: 25px;
+    margin-right:14px;
   }
   // ** more tab **/
   &.app-settings {
@@ -1037,7 +1072,7 @@ html[dir="rtl"] {
     margin: 0 0 5px 10px;
   }
   .right {
-    float:left;
+    float: left;
   }
   .header-text {
     text-align:right;

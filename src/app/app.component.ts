@@ -8,6 +8,7 @@ import { AppdataClass } from './shared/classes/appdata';
 import { Router } from '@angular/router';
 import { ToastNotification } from './shared/classes/toast';
 import { Achievements } from './shared/classes/achievements';
+import { PlayAudio } from 'src/app/shared/classes/playaudio';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +25,8 @@ export class AppComponent {
     private app: AppdataClass,
     private router: Router,
     private toast: ToastNotification,
-    private ach: Achievements
+    private ach: Achievements,
+    private audio: PlayAudio
   ) {
     this.initializeApp();
   }
@@ -87,6 +89,7 @@ export class AppComponent {
       }
 
       this.platform.backButton.subscribe(async () => {
+        this.audio.endAudio();
         if (this.router.url !== '/tabs/tabhome') this.router.navigate(['/tabs/tabhome']);
         else if (this.closeapp === 0) {
           this.closeapp++;

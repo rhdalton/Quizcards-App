@@ -3,7 +3,7 @@
   <ion-card *ngIf="Card" class="qcard quizcard quiz-color-white">
     <ion-card-content>
       <div class="card-extras">
-        <!--<div class="audiofile" (click)="selectAudioFile()"></div>-->
+        <div class="audiofile" (click)="selectAudioFile()"></div>
         <div class="upload-image" (click)="showImageActionSheet()"></div>
       </div>      
       <div class="card-header" dir="ltr">{{cardheader}}:</div>      
@@ -12,8 +12,11 @@
         <div class="remove-image" (click)="removeImage()"><img src="assets/icon/redx.svg"></div>
         <img class="card-image" src="{{ Card.c_image }}">
       </div>
-      <div *ngIf="Card.c_audio">
-        <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(300, Card)"></ion-icon>
+      <div *ngIf="Card.c_audio" style="clear:both;margin-top:10px;">        
+        <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(0, Card)"></ion-icon>
+        <div class="right sm">Audio: {{ Card.c_audio }}
+          <br /><div class="noaudiofile"(click)="removeAudio()">Remove Audio</div>
+        </div>        
       </div>
       <form #f="ngForm" (ngSubmit)="save(f)">
         <div class="form-group">

@@ -21,8 +21,8 @@
   <ion-card *ngFor="let q of Quizzes" class="qcard {{ q.quizcolor }}">
     <ion-card-content>
       <div class="right">
-        <div (click)="downloadCloudSet(q.cloudId, q.id)" class="download-set"></div>
         <div (click)="deleteCloudSetAlert(q.cloudId, q.id)" class="delete-set"></div>
+        <div (click)="downloadCloudSet(q.cloudId, q.id)" class="download-set"></div>        
       </div>
       {{ q.quizname }}
       <span class="card-count" dir="ltr">({{q.cardcount}} Card<span *ngIf="q.cardcount!=1">s</span>)</span>

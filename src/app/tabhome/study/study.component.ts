@@ -1,7 +1,7 @@
-import { Component, OnInit, Injectable } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Quiz } from 'src/app/models/quiz';
 import { SqliteService } from 'src/app/services/sqlite.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Card } from 'src/app/models/card';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { AppSettings } from 'src/app/models/appsettings';
@@ -9,12 +9,10 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import 'hammerjs';
 import { PopoverController, Platform, AlertController } from '@ionic/angular';
 import { QuiztypeComponent } from '../components/quiztype/quiztype.component';
-import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { QuizClass } from 'src/app/shared/classes/quiz';
 import { ToastNotification } from 'src/app/shared/classes/toast';
 import { Achievements } from 'src/app/shared/classes/achievements';
 import { PlayAudio } from 'src/app/shared/classes/playaudio';
-import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-study',
@@ -47,17 +45,16 @@ export class StudyComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private sqlite: SqliteService,
     private app: AppdataClass,
     private pop: PopoverController,
     private platform: Platform,
-    private tts: TextToSpeech,
     private quizClass: QuizClass,
     private toast: ToastNotification,
     private ach: Achievements,
     private audio: PlayAudio,
-    private alert: AlertController,
-    private nav: NavController
+    private alert: AlertController
   ) {
     this.quizId = this.route.snapshot.params.quizid;
     this.reload = this.route.snapshot.params.rl || '';
@@ -79,7 +76,17 @@ export class StudyComponent implements OnInit {
         return card.is_hidden !== 1;
       });
 
-      this.loadStudy();
+      if (this.Cards.length > 0) this.loadStudy();
+      else {
+        this.alert.create({
+          header: 'No Study Cards',
+          message: 'No cards avaliable to study. Check to make sure all cards are not "hidden".',
+          buttons: [
+            { text: 'OK' }
+          ]
+        }).then(a => a.present());
+        this.router.navigate(['/tabs/tabhome']);
+      }
     }
   }
 
@@ -112,7 +119,7 @@ export class StudyComponent implements OnInit {
   }
 
   async nextCard() {
-    console.log('next');
+    this.audio.endAudio();
     if (this._app.rtl) this._cardCountSwipe--;
     else this._cardCountSwipe++;
     await this.delay(200);
@@ -130,8 +137,8 @@ export class StudyComponent implements OnInit {
   }
 
   async prevCard() {
+    this.audio.endAudio();
     if (this.currentcard === 1) return;
-    console.log('prev');
     if (this._app.rtl) this._cardCountSwipe++;
     else this._cardCountSwipe--;
     await this.delay(200);
@@ -163,12 +170,12 @@ export class StudyComponent implements OnInit {
     }
   }
 
-  async hideCard(cardId) {
-    await this.sqlite.hideCard(cardId, this.quizId);
+  async hideCard(card: Card) {
+    await this.sqlite.hideCard(card.id, this.quizId);
 
     this.alert.create({
       header: 'Card Hidden',
-      message: 'This card has been hidden and will no longer appear in your Study & Quiz modes. You will still be able to see it when you edit this card set.',
+      message: 'This card has been hidden and will no longer appear in Study & Quiz modes. You will still be able to see it in Edit mode.',
       buttons: [
         { text: 'OK' }
       ]
@@ -176,7 +183,8 @@ export class StudyComponent implements OnInit {
   }
 
   editCard(cardId) {
-    this.nav.navigateForward('/tabs/tabmanage/card/' + this.quizId + '/' + cardId, { animated: false, });
+    this.audio.endAudio();
+    this.router.navigate(['/tabs/tabmanage/card/', this.quizId, cardId]);
   }
 
   setFontSize() {

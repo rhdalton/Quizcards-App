@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Camera, CameraOptions, PictureSourceType } from '@ionic-native/Camera/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
-import { FileTransfer } from '@ionic-native/file-transfer/ngx';
+import { FileTransfer, FileTransferObject } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/File/ngx';
 import { WebView } from '@ionic-native/ionic-webview/ngx';
-import { Platform } from '@ionic/angular';
+import { Platform, AlertController } from '@ionic/angular';
 import * as firebase from 'firebase/app';
+import { Card } from 'src/app/models/card';
 
 import { ToastNotification } from '../shared/classes/toast';
 
@@ -14,15 +15,17 @@ import { ToastNotification } from '../shared/classes/toast';
 })
 
 export class ImageService {
+  fileTransfer: FileTransferObject;
 
   constructor(
     private camera: Camera,
     private platform: Platform,
     private file: File,
     private filePath: FilePath,
-    private fileTransfer: FileTransfer,
+    private transfer: FileTransfer,
     private webview: WebView,
-    private toast: ToastNotification
+    private toast: ToastNotification,
+    private alert: AlertController
   ) { }
 
   async takePicture(sourceType: PictureSourceType) {
@@ -96,18 +99,42 @@ export class ImageService {
     this.toast.loadToast('Image removed.');
   }
 
-  async downloadFirebaseImageToDevice(url) {
-    const fullimage = this.file.dataDirectory + this.createFileName();
-    const img = await this.fileTransfer.create().download(url, fullimage);
-    if (img) {
-      return {
-        c_image: this.pathForImage(fullimage),
-        image_path: fullimage
-      };
-    } else {
-      return { c_image: '', image_path: '' };
+  async downloadImagesFromCloudStorage(cloudId, Cards: Card[], base: string) {
+    const storagepath = base + '/' + cloudId;
+    for (let i = 0; i < Cards.length; i++) {
+
+      if (Cards[i].c_image !== '') {
+        const fn = Cards[i].image_path.substr(Cards[i].image_path.lastIndexOf('/') + 1);
+        const imgUrl = await this.storageRef.child(storagepath + '/' + fn).getDownloadURL();
+        const downloadedImage = await this.downloadFirebaseImageToDevice(imgUrl);
+        // this.toast.loadToast(downloadedImage.c_image + '@' + downloadedImage.image_path, 15);
+        Cards[i].c_image = downloadedImage.c_image;
+        Cards[i].image_path = downloadedImage.image_path;
+      }
     }
+    return Cards;
   }
+
+  async downloadFirebaseImageToDevice(url, fn = '') {
+    return new Promise<any>((res, rej) => {
+      let fullimage = this.file.dataDirectory + fn;
+      if (fn === '') fullimage = this.file.dataDirectory + this.createFileName();
+      this.transfer.create().download(url, fullimage, true)
+        .then(entry => {
+          res({
+            c_image: this.pathForImage(entry.nativeURL),
+            image_path: entry.nativeURL
+          });
+        })
+        .catch((err) => {
+          res({
+            c_image: '',
+            image_path: ''
+          });
+        });
+    });
+  }
+
   createFileName() {
     const d = new Date().getTime();
     return d + '.jpg';

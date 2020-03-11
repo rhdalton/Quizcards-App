@@ -1,20 +1,29 @@
 <ion-content>
   <ion-card class="qcard quiz-color-white">
     <ion-item-divider class="header-text">
-      Import Quiz Cards backup:
+      Import QuizCards Set:
     </ion-item-divider>
     <ion-item-divider>
-      <div class="ion-item-divider-inner">
-        Quiz Cards backkups are stored at /dir. If you don't see your backup card set, make sure it is located in the correct folder on your device.
+      <div class="ion-item-divider-inner sm">
+        QuizCards exports are stored in <em>"/QuizCardsApp"</em> on your device. If you don't see your exported set, make sure it is located in this folder on your device.
       </div>
     </ion-item-divider>
-    <ion-item-divider *ngIf="backups.length === 0; else showBackups" class="alert alert-warning">
-      <span dir="ltr">No QuizCard backups found.</span>
+    <ion-item-divider *ngIf="!_isLoaded" class="alert alert-warning">
+      <ion-spinner name="lines-small"></ion-spinner><span dir="ltr">&nbsp; Loading QuizCard sets...</span>
     </ion-item-divider>
-    <ng-template #showBackups>
-      <ion-item-divider *ngFor="let b of backups" (click)="restoreBackup(b)">
-        {{b.name}}
-      </ion-item-divider>
-    </ng-template>
+    <ion-item-divider *ngIf="_isLoaded && backups.length == 0" class="alert alert-warning">
+      <span dir="ltr">No QuizCards exported sets found.</span>
+    </ion-item-divider>
   </ion-card>
+  <ng-container *ngIf="_isLoaded && backups.length > 0">
+    <ion-card *ngFor="let b of backups" class="qcard {{ b.quizcolor }}">
+      <ion-card-content>
+        <div class="right">
+          <div (click)="importCardset(b)" class="import-set"></div>        
+        </div>
+        {{ b.quizname }}
+        <span class="card-count" dir="ltr">({{b.cardcount}} Card<span *ngIf="b.cardcount!=1">s</span>)</span>
+      </ion-card-content>    
+    </ion-card>
+  </ng-container>
 </ion-content>

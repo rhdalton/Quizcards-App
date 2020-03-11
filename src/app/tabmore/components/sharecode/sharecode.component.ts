@@ -11,6 +11,12 @@ import { Quiz } from 'src/app/models/quiz';
 import { ImageService } from 'src/app/services/images.service';
 import { Router } from '@angular/router';
 import * as uuid from 'uuid';
+import { QuizcardsExport } from 'src/app/shared/classes/quizcardsexport';
+import { ExportCard } from 'src/app/models/exportcard';
+import { ExportQuiz } from 'src/app/models/exportquiz';
+import { Subscription } from 'rxjs';
+import { AppdataClass } from 'src/app/shared/classes/appdata';
+import { ToastNotification } from 'src/app/shared/classes/toast';
 
 @Component({
   selector: 'app-sharecode',
@@ -19,25 +25,41 @@ import * as uuid from 'uuid';
 })
 export class SharecodeComponent implements OnInit {
   _loader;
+  _userSub: Subscription;
+  _isPro: boolean;
+  User: User;
 
   constructor(
+    private auth: AuthService,
     private firestoreService: FirestoreService,
-    private sqlite: SqliteService,
+    private app: AppdataClass,
     private alert: AlertController,
     private load: LoadingController,
     private images: ImageService,
-    private router: Router
+    private router: Router,
+    private quizjson: QuizcardsExport,
+    private toast: ToastNotification
   ) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this._userSub = this.auth.appUser$.subscribe(appUser => {
+      if (!appUser) this.User = null;
+      else {
+        this.User = appUser;
+        // this.toast.loadToast('status: ' + this.User.userStatus);
+        this._isPro = this.app.isPro(this.User.userStatus);
+      }
+    });
+  }
 
 
   async submitCode(code) {
+    const cleancode = code.sharecode.toLowerCase().trim().toString();
+    if (cleancode === '') return;
+
     this._loader = await this.load.create({ message: 'Preparing download...' });
     this._loader.present();
 
-    const cleancode = code.sharecode.toLowerCase().trim().toString();
-    const expiredTime = firestore.Timestamp.now().seconds - 172800;
     const sharedQuizzes: FSShared[] = (await this.firestoreService.getShareQuizByCode(cleancode))
       .docs
       .map(q => {
@@ -45,31 +67,32 @@ export class SharecodeComponent implements OnInit {
           ...q.data()
         } as FSShared;
       });
-    const sharedQuiz = sharedQuizzes[0];
-    console.log(sharedQuiz);
 
-    // if quiz doesnt exist or expired
-    if (sharedQuizzes.length === 0 || sharedQuiz.sharetime < expiredTime) {
+    // if quiz doesnt exist
+    if (sharedQuizzes.length === 0) {
       this._loader.dismiss();
       this.alert.create({
-        header: 'QuizSet not found',
+        header: 'QuizCard Set not found',
         message: 'Sorry, we couldn\'nt find a shared QuizCard Set with this code. Check the code with your friend and try again.',
         buttons: ['OK']
       }).then(a => a.present());
       return;
     }
+    const sharedQuiz = sharedQuizzes[0];
+    const sharedQuizJson: ExportQuiz = JSON.parse(sharedQuiz.quizData);
 
-    // check for existing quiz
-    const existingQuiz = await this.sqlite.getQuiz(sharedQuiz.id);
-
-    if (sharedQuiz.shareId === existingQuiz.shareId) {
-      this._loader.dismiss();
-      this.alert.create({
-        header: 'Cardset Exists',
-        message: 'This Card set already exists on your device. Don\'t need to download',
-        buttons: ['OK']
-      }).then(a => a.present());
-      return;
+    this._loader.dismiss();
+    if (!this._isPro && sharedQuiz.hasImages) {
+      if (await this.alertImages()) {
+        for (let i = 0; i < sharedQuizJson.cards.length; i++) {
+          sharedQuizJson.cards[i].img = '';
+          sharedQuizJson.cards[i].imgp = '';
+        }
+      } else {
+        this.toast.loadToast('QuizCards download canceled.');
+        this.router.navigate(['/tabs/tabhome']);
+        return;
+      }
     }
 
     // else start download if quiz
@@ -77,55 +100,24 @@ export class SharecodeComponent implements OnInit {
     this._loader.present();
 
     // get quiz cards
-    const cards = (await this.firestoreService.getCloudSetCards(sharedQuiz.shareId, 'user_shared_quizzes'))
-      .docs
-      .map(c => {
-        return {
-          ...c.data(),
-          correct_count: 0
-        } as Card;
-      });
-    console.log(cards);
+    sharedQuizJson.quizid = uuid.v1();
+    await this.quizjson.importQuiz(sharedQuizJson);
 
-    const newQuizId = uuid.v1();
-
-    const newQuiz: Quiz = {
-      ...sharedQuiz,
-      id: newQuizId,
-      switchtext: 0,
-      cardview: 'detailed-view',
-      isArchived: 0,
-      isBackable: 1,
-      isMergeable: 1,
-      isShareable: 1,
-      isPurchased: 0,
-      cloudId: '',
-      shareId: '',
-      networkId: '',
-      ttsaudio: 0,
-      quizLimit: 30,
-      quizTimer: 0,
-      studyShuffle: 0,
-      quizShuffle: 1,
-      ttsSpeed: 80
-    };
-
-    await this.sqlite.addQuiz(newQuiz);
-
-    for (let i = 0; i < cards.length; i++) {
-      cards[i].id = uuid.v1();
-      cards[i].quiz_id = newQuizId;
-
-      if (cards[i].c_image !== '') {
-        const fn = cards[i].image_path.substr(cards[i].image_path.lastIndexOf('/') + 1);
-        const imgUrl = await this.images.storageRef.child(sharedQuiz.userId + '/' + fn).getDownloadURL();
-        const downloadedImage = await this.images.downloadFirebaseImageToDevice(imgUrl);
-        // this.toast.loadToast(downloadedImage.c_image, 10);
-        cards[i].c_image = downloadedImage.c_image;
-        cards[i].image_path = downloadedImage.image_path;
+    if (sharedQuiz.hasImages) {
+      for (let i = 0; i < sharedQuizJson.cards.length; i++) {
+        if (sharedQuizJson.cards[i].img !== '') {
+          const fn = sharedQuizJson.cards[i].imgp.substr(sharedQuizJson.cards[i].imgp.lastIndexOf('/') + 1);
+          const imgUrl = await this.images.storageRef.child('shared/' + sharedQuiz.shareId + '/' + fn).getDownloadURL();
+          const downloadedImage = await this.images.downloadFirebaseImageToDevice(imgUrl);
+          // this.toast.loadToast(downloadedImage.c_image, 10);
+          sharedQuizJson.cards[i].img = downloadedImage.c_image;
+          sharedQuizJson.cards[i].imgp = downloadedImage.image_path;
+        }
       }
     }
-    await this.sqlite.addCards(cards);
+
+    await this.quizjson.importCards(sharedQuizJson.quizid, sharedQuizJson.cards);
+    this.firestoreService.updateCloudDownloadCount(sharedQuiz.shareId, 'user_shared_cardsets');
 
     this._loader.dismiss();
     this.alert.create({
@@ -134,5 +126,18 @@ export class SharecodeComponent implements OnInit {
       buttons: ['OK']
     }).then(a => a.present());
     this.router.navigate(['/tabs/tabhome']);
+  }
+
+  async alertImages() {
+    return new Promise((res, rej) => {
+      this.alert.create({
+        header: 'Set Contains Images',
+        message: 'This QuizCard set contains images. Only Pro Account users can download the images in this set. Do you want to continue this download without images?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel', handler: () => res(false) },
+          { text: 'Yes', handler: () => res(true) }
+        ]
+      }).then(a => a.present());
+    });
   }
 }

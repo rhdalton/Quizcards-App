@@ -77,7 +77,7 @@ export class ComDownloadComponent implements OnInit {
 
     await this.sqlite.addCards(deviceCards);
 
-    this.firestoreService.updateNetworkDownloadCount(quiz.networkId);
+    this.firestoreService.updateCloudDownloadCount(quiz.networkId, 'network_quizzes');
 
     this._loader.dismiss();
 

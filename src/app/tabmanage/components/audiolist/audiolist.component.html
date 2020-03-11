@@ -1,20 +1,37 @@
-
 <ion-content>
-  <div class="quizModal">
+  <div class="quizModal bg-light">
     <div class="content-header">
         <div class="right" (click)="close()">CANCEL</div>        
-        <span dir="ltr"><img src="assets/icon/audiofile.svg"> INSERT AUDIO FILE</span>
+        <span dir="ltr"><img src="assets/icon/audiofile.svg"> INSERT AUDIO</span>
     </div>  
-    <ion-item-divider>
-      <div class="ion-item-inner">
-        <div class="com-dl-title" dir="ltr">
-          Select the audio file to attach to this card:
-        </div>
-        <div *ngFor="let a of audioList" class="com-dl-meta lh-5" (click)="addAudio(a)">{{a.name}}<div class="sm">{{a.fullPath}}</div></div>
+    <ion-item-divider style="background:#ebebeb;">
+      <div class="com-dl-title" dir="ltr">
+        Select the audio file to attach to this card:<br />
+        <div *ngFor="let s of searchItem">{{s}}</div>
       </div>
     </ion-item-divider>
-    <ion-item-divider *ngIf="searching">
-      Searching...
+    <div class="scroll-list audio-scroll">
+      <ion-item-divider *ngFor="let a of filteredAudio" (click)="addAudio(a)">
+        <div class="com-dl-meta lh-5" dir="ltr">
+          <strong>{{a.name}}</strong><div class="sm">Location: {{a.relativePath}}</div>
+        </div>
+      </ion-item-divider>
+      <ion-item-divider *ngIf="searching" dir="ltr">
+        <ion-spinner name="lines-small"></ion-spinner> Searching for audio files...
+      </ion-item-divider>
+      <ion-item-divider *ngIf="!searching && filteredAudio.length == 0">
+        <div dir="ltr">
+          No audio files found.
+        </div>
+      </ion-item-divider>
+      <ion-item-divider *ngIf="!searching">
+        <div class="sm" dir="ltr">
+          End of Search. The App searches the "Download" and "Music" directories. If you don't see your audio file listed, make sure it is in one of these 2 locations.
+        </div>
+      </ion-item-divider>
+    </div>
+    <ion-item-divider class="fixed-bottom">
+      <input #searchTerm (keyup.enter)="filterAudio(searchTerm.value)" type="text" class="input-text bgfocus" placeholder="Filter search results">
     </ion-item-divider>
   </div>
 </ion-content>

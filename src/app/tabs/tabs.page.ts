@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { IonTabs, NavController } from '@ionic/angular';
+import { PlayAudio } from 'src/app/shared/classes/playaudio';
 
 @Component({
   selector: 'app-tabs',
@@ -9,10 +10,12 @@ import { IonTabs, NavController } from '@ionic/angular';
 export class TabsPage {
 
   constructor(
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private audio: PlayAudio
   ) {}
 
   async gotoTab(tab) {
+    this.audio.endAudio();
     this.navCtrl.navigateRoot('/tabs/' + tab);
   }
 }

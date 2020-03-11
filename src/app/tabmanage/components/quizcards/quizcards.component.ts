@@ -14,6 +14,7 @@ import { MergecardsetComponent } from '../mergecardset/mergecardset.component';
 import { NetworkService } from 'src/app/services/network.service';
 import { File } from '@ionic-native/File/ngx';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
+import { QuizcardsExport } from 'src/app/shared/classes/quizcardsexport';
 
 @Component({
   selector: 'app-quizcards',
@@ -45,7 +46,7 @@ export class QuizcardsComponent implements OnInit {
     private network: NetworkService,
     private file: File,
     private keyboard: Keyboard,
-    private navCtrl: NavController
+    private exportquiz: QuizcardsExport
   ) {
     this._quizId = this.route.snapshot.params.quizid;
     this._cardsloaded = false;
@@ -87,11 +88,9 @@ export class QuizcardsComponent implements OnInit {
       }).then(a => a.present());
       return;
     } else if (pos !== null) {
-      this.navCtrl.navigateForward('/tabs/tabmanage/card/' + this._quizId + '/0/' + pos, { animated: false, });
-      // his.router.navigate(['/tabs/tabmanage/card', this._quizId, 0, pos]);
+      this.router.navigate(['/tabs/tabmanage/card/', this._quizId, '0', pos]);
     } else {
-      this.navCtrl.navigateForward('/tabs/tabmanage/card/' + this._quizId, { animated: false, });
-      // this.router.navigate(['/tabs/tabmanage/card', this._quizId]);
+      this.router.navigate(['/tabs/tabmanage/card/', this._quizId]);
     }
   }
 
@@ -204,51 +203,65 @@ export class QuizcardsComponent implements OnInit {
     }).then(m => m.present());
   }
 
+  async alertMedia() {
+    return new Promise(async (res) => {
+      const a = await this.alert.create({
+        header: 'Image/Audio Cards',
+        message: 'Images & Audio clips cannot be exported to file. However, the cards will save the locations of image/audio on local device. ' +
+        'If the media remains on your device, you will be able to import this card set and still use the media in your set.',
+        buttons: [
+          { text: 'Cancel', role: 'cancel', handler: () => res(false) },
+          { text: 'Continue Export', handler: () => res(true) }
+        ],
+        backdropDismiss: false
+      });
+      await a.present();
+    });
+  }
+
   async exportToDevice() {
     this.pop.dismiss();
 
+    if (this.allCards.length === 0) {
+      this.alert.create({
+        header: 'Export to Device',
+        message: 'At least one card is required to export a QuizCards set.',
+        buttons: [
+          { text: 'Dismiss', role: 'cancel' }
+        ]
+      }).then(a => a.present());
+      return;
+    }
+
+    for (let i = 0; i < this.allCards.length; i++) {
+      if (this.allCards[i].c_image !== '' || this.allCards[i].c_audio !== '') {
+        if (!await this.alertMedia()) return;
+        break;
+      }
+    }
+
     this.alert.create({
       header: 'Export to Device',
-      message: 'This will create a file with your card set data on your device.',
+      message: 'This will export your QuizCards set to a file in the directory "/QuizCardsApp". You\'ll be able to keep this file to import this set at any time.',
       buttons: [
         { text: 'Cancel', role: 'cancel', handler: () => {} },
-        { text: 'Export', handler: () => this.doExport() }
+        { text: 'OK', handler: () => this.doExport() }
       ]
     }).then(a => a.present());
   }
 
-  doExport() {
+  async doExport() {
     // console.log('export: ', this.File.externalApplicationStorageDirectory);
-    const quizJson = {
-      quizname: this.Quiz.quizname,
-      quizcolor: this.Quiz.quizcolor,
-      cards: []
-    };
-
-    for (const c of this.allCards) {
-      const cardJson = {
-        txt: c.c_text,
-        subtxt: c.c_subtext,
-        ans: c.c_correct,
-        study: c.c_study,
-        substudy: c.c_substudy
-      };
-      quizJson.cards.push(cardJson);
+    const quizJson = this.exportquiz.quizToJson(this.Quiz, this.allCards);
+    if (await this.exportquiz.exportQuizToDevice(quizJson, this.Quiz.quizname)) {
+      this.alert.create({
+        header: 'Export Success',
+        message: 'This card set has successfully been exported to your device\'s "/QuizCardsApp" directory. You can import it by going to the "MORE" tab.',
+        buttons: [
+          { text: 'OK' }
+        ]
+      }).then(a => a.present());
     }
-
-    const quizJsonString = JSON.stringify(quizJson);
-
-    let filename = this.Quiz.quizname.replace(/[^\W]/gi, '') || 'unnamed';
-    filename += ".qcs";
-    this.file.writeFile(this.file.externalApplicationStorageDirectory, filename, quizJsonString, {replace: true});
-
-    this.alert.create({
-      header: 'Export to Device',
-      message: 'This set has been exported to ' + this.file.externalApplicationStorageDirectory,
-      buttons: [
-        { text: 'Ok', handler: () => this.alert.dismiss() }
-      ]
-    }).then(a => a.present());
   }
 
   async backupToCloud() {
@@ -294,5 +307,4 @@ export class QuizcardsComponent implements OnInit {
     await this.sqlite.updateCardView(this.Quiz);
     this.toast.loadToast(msg);
   }
-
 }

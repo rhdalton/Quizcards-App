@@ -17,7 +17,7 @@
               </div>
             </div>
             <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
-              <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audioActive" (click)="playAudio(300)"></ion-icon>
+              <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(300, Card, Quiz)"></ion-icon>
             </div>
           </div>
           <ng-template #switch>

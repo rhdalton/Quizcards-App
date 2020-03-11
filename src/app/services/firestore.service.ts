@@ -5,6 +5,9 @@ import * as firebase from 'firebase/app';
 import { File } from '@ionic-native/File/ngx';
 import { NWQuiz } from '../models/fsnetwork';
 import { Achievements } from '../shared/classes/achievements';
+import { ToastNotification } from 'src/app/shared/classes/toast';
+import { FSShared } from 'src/app/models/fsshared';
+import { Card } from 'src/app/models/card';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +17,8 @@ export class FirestoreService {
   constructor(
     private fs: AngularFirestore,
     private file: File,
-    private achieve: Achievements
+    private achieve: Achievements,
+    private toast: ToastNotification
   ) { }
 
   getFirestoreUserByName(name) {
@@ -69,7 +73,7 @@ export class FirestoreService {
     const newFSQuiz = this.fs.firestore.collection(collection).doc();
 
     if (collection === 'user_cardsets') quiz.cloudId = newFSQuiz.id;
-    else if (collection === 'user_shared_quizzes') quiz.shareId = newFSQuiz.id;
+    else if (collection === 'user_shared_cardsets') quiz.shareId = newFSQuiz.id;
     else if (collection === 'network_quizzes') quiz.networkId = newFSQuiz.id;
 
     batch.set(newFSQuiz, quiz);
@@ -80,7 +84,7 @@ export class FirestoreService {
   async updateCloudCardSet(quiz: any, collection) {
     let docId;
     if (collection === 'user_cardsets') docId = quiz.cloudId;
-    else if (collection === 'user_shared_quizzes') docId = quiz.shareId;
+    else if (collection === 'user_shared_cardsets') docId = quiz.shareId;
     else if (collection === 'network_quizzes') docId = quiz.networkId;
 
     if (docId) await this.fs.firestore.collection(collection).doc(docId).set(quiz);
@@ -94,7 +98,6 @@ export class FirestoreService {
 
   async saveCloudSetCards(cloudId, cards, collection, withImages = false) {
     await this.deleteCloudSetCards(cloudId, collection);
-    const storageRef = firebase.storage().ref();
     const batch = this.fs.firestore.batch();
     for (let i = 0; i < cards.length; i++) {
       const cardRef = this.fs.firestore.collection(collection).doc(cloudId).collection('cards').doc();
@@ -102,16 +105,22 @@ export class FirestoreService {
       batch.set(cardRef, cards[i]);
 
       if (withImages && cards[i].c_image && cards[i].c_image !== '') {
-        // this.toast.loadToast('uploading image ' + i);
-        const fp = cards[i].image_path.substr(0, cards[i].image_path.lastIndexOf('/') + 1);
-        const fn = cards[i].image_path.substr(cards[i].image_path.lastIndexOf('/') + 1);
-        this.file.readAsArrayBuffer(fp, fn).then(ab => {
-          const blob = new Blob([ab], {type: 'image/jpeg'});
-          storageRef.child(cloudId + '/' + fn).put(blob);
-        });
+        this.uploadStorageImage(cloudId, cards[i], 'cloud');
       }
     }
     await batch.commit();
+  }
+
+  async uploadStorageImage(cloudId: string, card: Card, base: string) {
+    const storageloc = base + '/' + cloudId;
+    const storageRef = firebase.storage().ref();
+    const fp = card.image_path.substr(0, card.image_path.lastIndexOf('/') + 1);
+    const fn = card.image_path.substr(card.image_path.lastIndexOf('/') + 1);
+    // this.toast.loadToast('Uploading image... ' + i);
+    this.file.readAsArrayBuffer(fp, fn).then(ab => {
+      const blob = new Blob([ab], {type: 'image/jpg'});
+      storageRef.child(storageloc + '/' + fn).put(blob);
+    });
   }
 
   async deleteCloudSetCards(cloudId, collection) {
@@ -142,8 +151,8 @@ export class FirestoreService {
   }
 
   async getShareQuizByCode(code: string) {
-    return this.fs.firestore.collection('user_shared_quizzes')
-      .where('sharecode', '==', code)
+    return this.fs.firestore.collection('user_shared_cardsets')
+      .where('shareCode', '==', code)
       .get();
   }
 
@@ -159,12 +168,28 @@ export class FirestoreService {
       });
   }
 
-  async updateNetworkDownloadCount(networkId) {
-    const q = await this.fs.firestore.collection('network_quizzes').doc(networkId);
+  async updateCloudDownloadCount(cloudId, collection) {
+    const q = await this.fs.firestore.collection(collection).doc(cloudId);
     this.fs.firestore.runTransaction(t => {
         return t.get(q).then(doc => {
           t.update(q, { quizdownloads: doc.data().quizdownloads + 1 });
         });
       });
+  }
+
+  async deleteStorageFiles(cloudId, base: string) {
+    const ref = firebase.storage().ref(base + '/' + cloudId) as any;
+    const dir = await ref.listAll();
+    dir.items.forEach(fileRef => {
+      ref.child(fileRef).delete();
+    });
+  }
+
+  async fetchStorageFiles(cloudId) {
+    const ref = firebase.storage().ref(cloudId) as any;
+    const dir = await ref.listAll();
+    dir.items.forEach(fileRef => {
+      ref.child(fileRef).getDownloadUrl();
+    });
   }
 }
