@@ -36,6 +36,7 @@ export class HomePage implements OnInit {
     // this.storage.clear();
     // this.ach.updateLocalAchievement(13, 1);
     this.Quizzes = [];
+    this._homeLoaded = true;
   }
 
   showFilter() {

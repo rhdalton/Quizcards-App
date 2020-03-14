@@ -9,6 +9,7 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { Subscription } from 'rxjs';
 import { ComUploadmodalComponent } from '../com-uploadmodal/com-uploadmodal.component';
+import { Card } from 'src/app/models/card';
 
 @Component({
   selector: 'app-com-upload',
@@ -54,16 +55,39 @@ export class ComUploadComponent implements OnInit {
       return;
     }
 
+    const cards: Card[] = await this.sqlite.getQuizCards(quiz.id);
+    for (let i = 0; i < cards.length; i++) {
+      if (cards[i].c_audio !== '' || cards[i].c_image !== '') {
+        this.alert.create({
+          header: 'Contains Image/Audio',
+          message: 'Uploading images and audio to the community is currently not enabled. This will be enabled in a later update.',
+          buttons: ['DISMISS']
+        }).then(a => a.present());
+        return;
+      }
+    }
+
     let quizExist: NWQuiz;
     if (quiz.networkId && quiz.networkId !== '') quizExist = (await this.firestoreService.getFirestoreQuiz(quiz.networkId, 'network_quizzes')).data() as NWQuiz;
 
-    if (quizExist) {
+    console.log(quiz, quizExist);
+
+    if (quizExist && quizExist.quizauthor === this.User.displayName) {
       this.alert.create({
         header: 'QuizCard Set Exists',
         message: 'This Set already exists in the QuizCards Community. You can update the Community set with the one on your device.',
         buttons: [
           { text: 'Cancel', role: 'cancel' },
           { text: 'Update', handler: () => this.uploadQuizDetailsModal(quiz, quizExist) }
+        ]
+      }).then(a => a.present());
+      return;
+    } else if (quizExist) {
+      this.alert.create({
+        header: 'QuizCard Set Exists',
+        message: 'This Set already exists in the QuizCards Community. You can only upload card sets originally created by you.',
+        buttons: [
+          { text: 'Cancel', role: 'cancel' },
         ]
       }).then(a => a.present());
       return;

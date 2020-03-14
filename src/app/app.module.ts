@@ -27,6 +27,7 @@ import { AchievealertComponent } from './shared/components/achievealert/achievea
 import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { Media } from '@ionic-native/media/ngx';
+import { Networkcategories } from './shared/classes/networkcategories';
 
 export class CustomHammerConfig extends HammerGestureConfig  {
   overrides = {
@@ -69,7 +70,8 @@ export class CustomHammerConfig extends HammerGestureConfig  {
     Network,
     TextToSpeech,
     { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig },
-    Media
+    Media,
+    Networkcategories
   ],
   bootstrap: [AppComponent]
 })

@@ -13,6 +13,8 @@ import { SqliteService } from 'src/app/services/sqlite.service';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { ToastNotification } from 'src/app/shared/classes/toast';
 import { ImageService } from 'src/app/services/images.service';
+import { QuizcardsExport } from 'src/app/shared/classes/quizcardsexport';
+import { ExportQuiz } from 'src/app/models/exportquiz';
 
 @Component({
   selector: 'app-usercloud',
@@ -26,6 +28,9 @@ export class UsercloudComponent implements OnDestroy {
   _backupId = '';
   _loader;
   _isPro: boolean;
+  _imageData: any;
+  _imagePathData: any;
+  _currentCloudSet: FSQuiz;
   User: User;
   Quizzes: FSQuiz[];
 
@@ -39,7 +44,8 @@ export class UsercloudComponent implements OnDestroy {
     private router: Router,
     private alert: AlertController,
     private toast: ToastNotification,
-    private image: ImageService
+    private image: ImageService,
+    private quizjson: QuizcardsExport
   ) { }
 
   async ionViewWillEnter() {
@@ -93,6 +99,7 @@ export class UsercloudComponent implements OnDestroy {
   }
 
   async alertImages() {
+    this._loader.dismiss();
     return new Promise(async (res) => {
       const a = await this.alert.create({
         header: 'Set Contains Images',
@@ -107,6 +114,7 @@ export class UsercloudComponent implements OnDestroy {
   }
 
   async alertAudio() {
+    this._loader.dismiss();
     return new Promise(async (res) => {
       const a = await this.alert.create({
         header: 'Set Contains Audio',
@@ -122,10 +130,27 @@ export class UsercloudComponent implements OnDestroy {
     });
   }
 
+  async alertData() {
+    this._loader.dismiss();
+    return new Promise(async (res) => {
+      this.alert.create({
+        header: 'Card Set Images',
+        message: 'This card set contains Images. Downloading this set may use extra data on your device\'s Internet data plan based on the number of images ' +
+          'that require downloading. Do you want to continue with the download of this set and all images?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel', handler: () => res(false) },
+          { text: 'Continue', handler: () => res(true) }
+        ]
+      }).then(a => a.present());
+    });
+  }
+
   async backupCardSet() {
 
     let hasImages = false;
     let hasAudio = false;
+    this._imageData = [];
+    this._imagePathData = [];
 
     // get the quiz to back up
     const quiz: Quiz = await this.sqlite.getQuiz(this._backupId);
@@ -137,12 +162,13 @@ export class UsercloudComponent implements OnDestroy {
         if (!this._isPro) {
           cardsToSync[i].c_image = '';
           cardsToSync[i].image_path = '';
+        } else {
+          this._imagePathData.push(cardsToSync[i].image_path);
+          this._imageData.push(cardsToSync[i].c_image.substr(cardsToSync[i].c_image.lastIndexOf('/') + 1));
         }
       }
       if (cardsToSync[i].c_audio !== '') hasAudio = true;
     }
-
-    this._loader.dismiss();
 
     if (!this._isPro && hasImages && !await this.alertImages()) {
       this.router.navigate(['/tabs/tabmanage/cards', this._backupId]);
@@ -152,17 +178,24 @@ export class UsercloudComponent implements OnDestroy {
       this.router.navigate(['/tabs/tabmanage/cards', this._backupId]);
       return;
     }
-    // if cloudId exists, then ask if they want to replace existing backup
+
+    // check if cloud quiz already exists
     if (quiz.cloudId !== '') {
-      this.alert.create({
-        header: 'Update Cloud Set',
-        message: 'This card set already exists on your cloud account. Do you want to update the cloud set with this one?',
-        buttons: [
-          { text: 'Cancel', role: 'cancel', handler: () => this.router.navigate(['/tabs/tabmanage/cards', this._backupId]) },
-          { text: 'Yes', handler: () => this.syncCardSet(quiz, cardsToSync, true) }
-        ]
-      }).then(a => a.present());
-      return;
+
+      this._currentCloudSet = (await this.firestore.getFirestoreQuiz(quiz.cloudId, 'user_cardsets')).data() as FSQuiz;
+
+      if (this._currentCloudSet) {
+        this._loader.dismiss();
+        this.alert.create({
+          header: 'Update Cloud Set',
+          message: 'This card set already exists on your cloud account. Do you want to update the cloud set with this one?',
+          buttons: [
+            { text: 'Cancel', role: 'cancel', handler: () => this.router.navigate(['/tabs/tabmanage/cards', this._backupId]) },
+            { text: 'Yes', handler: () => this.syncCardSet(quiz, cardsToSync, true) }
+          ]
+        }).then(a => a.present());
+        return;
+      }
     }
 
     // check if user has cloud space for new backup
@@ -170,6 +203,7 @@ export class UsercloudComponent implements OnDestroy {
 
     // if cloud limit reached, show alert
     if (cloudsetCount >= this._limits.cloudLimit) {
+      this._loader.dismiss();
       this.alert.create({
         header: 'Cloud Limit Reached',
         message: 'You have reached your limit of ' + this._limits.cloudLimit + ' Card sets on the cloud. Please upgrade to QuizCards Pro or remove a cloud backup to make space.',
@@ -179,6 +213,7 @@ export class UsercloudComponent implements OnDestroy {
       return;
     }
 
+    this._loader.dismiss();
     // if everything ok, sync set
     this.syncCardSet(quiz, cardsToSync);
   }
@@ -188,17 +223,42 @@ export class UsercloudComponent implements OnDestroy {
     this._loader = await this.load.create({ message: 'Backing up to cloud...' });
     this._loader.present();
 
-    const cloudQuizObj = this.newCloudQuizObj(quiz);
+    const cloudQuizObj = this.newCloudQuizObj(quiz, cards);
 
+    // IF RESYNC TO CLOUD //
     if (resync) {
-      this.firestore.deleteStorageFiles(quiz.cloudId, 'cloud');
+
+      // delete images from prev cloud imageData NOT in new Synced card set imageData
+      const prevImageData = (this._currentCloudSet.imageData) ? JSON.parse(this._currentCloudSet.imageData) : [];
+      for (let i = 0; i < prevImageData.length; i++) {
+        if (!this._imageData.includes(prevImageData[i])) {
+          await this.firestore.deleteStorageFile(quiz.cloudId, 'cloud', prevImageData[i]);
+        }
+      }
+
       await this.firestore.updateCloudCardSet(cloudQuizObj, 'user_cardsets');
-      await this.syncCardSetCards(quiz.cloudId, cards);
+
+      // upload new images not already in prev cloud imageData
+      for (let i = 0; i < this._imagePathData.length; i++) {
+        const fn = this._imagePathData[i].substr(this._imagePathData[i].lastIndexOf('/') + 1);
+        if (!prevImageData.includes(fn)) {
+          this.firestore.uploadStorageImage(quiz.cloudId, this._imagePathData[i], 'cloud');
+        }
+      }
+
+      // delete cards sub-collection from old cardset structure
+      this.firestore.deleteCloudSetCards(quiz.cloudId, 'user_cardsets');
+
     } else {
+    // ELSE NEW BACKUP TO CLOUD //
+
       const newCloudQuiz = await this.firestore.saveCloudCardSet(cloudQuizObj, 'user_cardsets');
       if (newCloudQuiz.id) {
         await this.sqlite.updateQuizFirestoreId(quiz.id, newCloudQuiz.id, 'cloud');
-        await this.syncCardSetCards(newCloudQuiz.id, cards);
+        // upload images to cloud storage
+        for (let i = 0; i < this._imagePathData.length; i++) {
+          this.firestore.uploadStorageImage(newCloudQuiz.id, this._imagePathData[i], 'cloud');
+        }
       }
     }
 
@@ -216,21 +276,20 @@ export class UsercloudComponent implements OnDestroy {
     await this.firestore.saveCloudSetCards(cloudId, cards, 'user_cardsets', saveImages);
   }
 
-  newCloudQuizObj(quiz: Quiz) {
+  newCloudQuizObj(quiz: Quiz, cards: Card[]) {
     return {
-      id: quiz.id,
       user_id: this.User.uid,
+      user_name: this.User.displayName,
+      cloudId: (quiz.cloudId) ? quiz.cloudId : '',
+      quizId: quiz.id,
       quizname: quiz.quizname,
       quizcolor: quiz.quizcolor,
-      switchtext: quiz.switchtext,
       cardcount: quiz.cardcount,
-      cardview: quiz.cardview,
       isMergeable: quiz.isMergeable,
       isShareable: quiz.isShareable,
       isPurchased: quiz.isPurchased,
-      cloudId: (quiz.cloudId) ? quiz.cloudId : '',
-      creator_name: quiz.creator_name,
-      tts: quiz.tts
+      quizData: this.quizjson.quizToJson(quiz, cards),
+      imageData: (this._imageData.length === 0) ? '' : JSON.stringify(this._imageData)
     } as FSQuiz;
   }
 
@@ -243,7 +302,7 @@ export class UsercloudComponent implements OnDestroy {
 
     this._loader.dismiss();
 
-    if (Object.keys(deviceQuiz).length > 0) {
+    if (Object.keys(deviceQuiz).length > 0 && deviceQuiz.cloudId !== '') {
       this.alert.create({
         header: 'Card Set Exists',
         message: 'This card set already exists on your device. Do you want to download and replace the card set on your device?',
@@ -268,19 +327,32 @@ export class UsercloudComponent implements OnDestroy {
       return;
     }
 
-    let cloudCards = (await this.firestore.getCloudSetCards(cloudId, 'user_cardsets'))
-      .docs.map(e => {
-        return {
-          ...e.data()
-        } as Card;
-      });
+    if (cloudQuiz.imageData && cloudQuiz.imageData !== '') {
+      if (!await this.alertData()) {
+        return;
+      } else {
+        this._loader = await this.load.create({ message: 'Downloading card set...' });
+        this._loader.present();
+      }
+    }
 
     const deviceQuiz: Quiz = {
-      ...cloudQuiz,
+      id: (cloudQuiz.quizId) ? cloudQuiz.quizId : cloudQuiz.id,
+      cloudId: cloudQuiz.cloudId,
+      creator_name: cloudQuiz.user_name,
+      quizname: cloudQuiz.quizname,
+      quizcolor: cloudQuiz.quizcolor,
+      cardcount: cloudQuiz.cardcount,
+      cardview: 'detail-view',
+      switchtext: 0,
       isArchived: 0,
       isBackable: 1,
+      isMergeable: cloudQuiz.isMergeable,
+      isShareable: cloudQuiz.isShareable,
+      isPurchased: cloudQuiz.isPurchased,
       networkId: '',
       shareId: '',
+      tts: '',
       ttsaudio: 0,
       quizLimit: 30,
       quizTimer: 0,
@@ -296,9 +368,21 @@ export class UsercloudComponent implements OnDestroy {
       await this.sqlite.addQuiz(deviceQuiz);
     }
 
-    if (this.User.userStatus === 'pro') cloudCards = await this.image.downloadImagesFromCloudStorage(cloudId, cloudCards, 'cloud');
-
-    await this.sqlite.addCards(cloudCards, false);
+    if (cloudQuiz.quizData && cloudQuiz.quizData !== '') {
+      // download images from quizData json
+      const quizjson = JSON.parse(cloudQuiz.quizData) as ExportQuiz;
+      if (this._isPro) quizjson.cards = await this.image.downloadImagesFromCloudStorageJson(cloudId, quizjson.cards, 'cloud');
+      this.quizjson.importCards(deviceQuiz.id, quizjson.cards);
+    } else {
+      // ELSE IF DOWNLOADING OLD QUIZ FORMAT
+      const cloudCards = (await this.firestore.getCloudSetCards(cloudId, 'user_cardsets'))
+      .docs.map(e => {
+        return {
+          ...e.data()
+        } as Card;
+      });
+      await this.sqlite.addCards(cloudCards, false);
+    }
 
     this._loader.dismiss();
     this.toast.loadToast('Card Set has been downloaded!');
@@ -322,9 +406,20 @@ export class UsercloudComponent implements OnDestroy {
 
     await this.sqlite.updateQuizFirestoreId(quizId, '', 'cloud');
 
-    await this.firestore.deleteCloudSetCards(cloudId, 'user_cardsets');
+    const cloudQuiz = (await this.firestore.getFirestoreQuiz(cloudId, 'user_cardsets')).data() as FSQuiz;
+
+    if (!cloudQuiz.quizData || cloudQuiz.quizData === '') {
+      await this.firestore.deleteCloudSetCards(cloudId, 'user_cardsets');
+    }
+
     await this.firestore.deleteCloudCardSet(cloudId, 'user_cardsets');
-    this.firestore.deleteStorageFiles(cloudId, 'cloud');
+
+    if (cloudQuiz.imageData && cloudQuiz.imageData !== '') {
+      const imgData = JSON.parse(cloudQuiz.imageData);
+      for (let i = 0; i < imgData.length; i++) {
+        this.firestore.deleteStorageFile(cloudId, 'cloud', imgData[i]);
+      }
+    }
 
     for (let i = 0; i < this.Quizzes.length; i++) {
       if (this.Quizzes[i].cloudId === cloudId) {

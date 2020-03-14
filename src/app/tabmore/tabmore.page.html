@@ -10,10 +10,18 @@
         </div>
       </ion-item-divider>
       <ion-item-divider>
+        <div (click)="gotoCommunity()" class="ion-item-divider-inner account-service">
+          <img class="" src="assets/icon/network.svg">
+          <div>QuizCards Community
+            <div class="sm"><span dir="ltr">Upload & Download from the QuizCards Community. Browse topics including languages, school subjects and more.</span></div>
+          </div>
+        </div>
+      </ion-item-divider>
+      <ion-item-divider>
         <div routerLink="/tabs/tabmore/import" class="ion-item-divider-inner account-service">
           <img class="" src="assets/icon/import.svg">
           <div>Import from Device
-            <div class="sm"><span dir="ltr">Import a card set from your device that you have exported previously.</span></div>
+            <div class="sm"><span dir="ltr">Import a card set from your device that you have previously exported.</span></div>
           </div>
         </div>
       </ion-item-divider>
@@ -25,15 +33,11 @@
           </div>
         </div>
       </ion-item-divider>
-
       <ion-item-divider>
-        <div (click)="gotoCommunity()" class="ion-item-divider-inner account-service">
-          <img class="" src="assets/icon/network.svg">
-          <div>QuizCards Community
-            <div class="sm"><span dir="ltr">Upload & Download from the QuizCards Community. Browse topics including languages, school subjects and more.</span></div>
-          </div>
+        <div routerLink="/tabs/tabmore/restore" class="ion-item-divider-inner account-service">
+          <img class="" src="assets/icon/restore.svg"><div>Restore Archived Card Set</div>
         </div>
-      </ion-item-divider>
+      </ion-item-divider>      
       <ion-item-divider>
         <div routerLink="/tabs/tabmore/settings" class="ion-item-divider-inner account-service">
           <img class="" src="assets/icon/settings.svg">
@@ -42,19 +46,22 @@
           </div>
         </div>
       </ion-item-divider>
-
-      <ion-item-divider>
-        <div routerLink="/tabs/tabmore/restore" class="ion-item-divider-inner account-service">
-          <img class="" src="assets/icon/restore.svg"><div>Restore Archived Card Set</div>
-        </div>
-      </ion-item-divider>
-
       <ion-item-divider>
         <div routerLink="/tabs/tabmore/about" class="ion-item-divider-inner account-service">
           <img class="" src="assets/icon/about.svg"><div>About QuizCards</div>
         </div>
       </ion-item-divider>
-  
+      <ion-item-divider *ngIf="app">
+        <div class="lh-5">
+        Latest Updates:
+        <ng-container *ngIf="latestNews">
+          <div *ngIf="app.appVersion && latestNews.v && app.appVersion !== latestNews.v" class="sm alert alert-notify ion-margin-bottom">The latest version of QuizCards is <strong>{{latestNews.v}}</strong>. Its highly recommened you update the app to take advantange
+            of the latest features and performance upgrades.
+          </div>
+          <div *ngFor="let n of latestNews.items" class="sm">&bull; {{n}}</div>
+        </ng-container>
+      </div>
+      </ion-item-divider>  
     </ion-card>
   </ion-content>
   

@@ -1,5 +1,40 @@
 
-<ion-card *ngFor="let q of Quizzes" (click)="downloadQuizModal(q)" class="qcard com-card {{ q.quizcolor }}">
+<ion-grid>
+  <ion-row class="ion-align-items-center">
+    <ion-col size="4" class="ion-justify-content-start">
+      <div>
+        Filter
+      </div>
+    </ion-col>
+    <ion-col size="8" class="ion-justify-content-end">
+      <div>
+        <select [(ngModel)]="current_cat" (change)="changeCat()" name="current_cat" class="input-select bgfocus">
+          <option value="">-- Select Category</option>
+          <option *ngFor="let c of catList" value="{{ c }}">{{ c }}</option>
+        </select>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ng-container *ngIf="current_cat && current_cat !== ''">
+    <ion-row class="ion-align-items-center">
+      <ion-col size="4" class="ion-justify-content-start">
+        <div>
+          Subcategory
+        </div>
+      </ion-col>
+      <ion-col size="8" class="ion-justify-content-end">
+        <div>
+          <select [(ngModel)]="current_subcat" (change)="changeSubcat()" name="current_subcat" class="input-select bgfocus">
+            <option value="">-- Select Subcategory</option>
+            <option *ngFor="let s of subcatList" value="{{ s }}">{{ s }}</option>
+          </select>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ng-container>
+</ion-grid>
+
+<ion-card *ngFor="let q of currentQuizList" (click)="downloadQuizModal(q)" class="qcard com-card {{ q.quizcolor }}">
   <ion-card-content dir="ltr">
     <div class="qctext" dir="ltr">{{ q.quizcategory | uppercase }} / {{ q.quizsubcat | uppercase }}</div>
     {{ q.quizname }}
@@ -11,3 +46,14 @@
     </div>
   </ion-card-content>
 </ion-card>
+<ion-item-divider *ngIf="noMore">
+  <div class="ion-item-inner ion-text-center">
+    No more QuizCard sets found.
+  </div>  
+</ion-item-divider>
+<ion-infinite-scroll threshold="80px" (ionInfinite)="loadMore($event)">
+  <ion-infinite-scroll-content
+    loadingSpinner="bubbles"
+    loadingText="Loading more QuizCard sets...">
+  </ion-infinite-scroll-content>
+</ion-infinite-scroll>

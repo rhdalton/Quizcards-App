@@ -16,4 +16,20 @@
   <div style="width:100%;text-align:center;margin-top:10px">
     <ion-button (click)="downloadQuiz(quiz)" style="font-size:16px">Download</ion-button>
   </div>
+  <div class="com-dl-top ion-padding-top" dir="ltr">
+    <strong dir="ltr">Card Preview (first 25 cards):</strong>
+  </div>
+  {{ noPreview }}
+  <div *ngIf="quizData" style="height:200px;overflow-y:scroll;" dir="ltr">
+    <ion-card *ngFor="let c of quizData.cards | slice:0:25" class="qcard quiz-color-white">
+      <ion-card-content>
+        <div class="preview-card">
+          {{c.txt}}
+        </div>
+        <div class="preview-answer">
+          {{c.study}}
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </div>

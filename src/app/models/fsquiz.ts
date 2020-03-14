@@ -1,16 +1,17 @@
+import { ExportQuiz } from 'src/app/models/exportquiz';
 
 export interface FSQuiz {
-  id: string;
   user_id: string;
+  user_name: string;
+  cloudId: string;
+  id?: string;
+  quizId: string;
   quizname: string;
   quizcolor: string;
-  switchtext: number;
   cardcount: number;
-  cardview: string;
   isMergeable: number;
   isShareable: number;
   isPurchased: number;
-  cloudId: string;
-  creator_name: string;
-  tts: string;
+  quizData: string;
+  imageData: string;
 }

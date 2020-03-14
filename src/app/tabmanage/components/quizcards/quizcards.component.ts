@@ -137,6 +137,7 @@ export class QuizcardsComponent implements OnInit {
       componentProps: {
         popover: this.pop,
         quizid: this._quizId,
+        cardcount: this.Quiz.cardcount,
         isBackable: this.Quiz.isBackable,
         isMergeable: this.Quiz.isMergeable,
         isShareable: this.Quiz.isShareable,

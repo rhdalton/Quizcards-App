@@ -8,6 +8,8 @@ import { Achievements } from '../shared/classes/achievements';
 import { ToastNotification } from 'src/app/shared/classes/toast';
 import { FSShared } from 'src/app/models/fsshared';
 import { Card } from 'src/app/models/card';
+import { ExportQuiz } from '../models/exportquiz';
+import { Networkcategories } from '../shared/classes/networkcategories';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +20,8 @@ export class FirestoreService {
     private fs: AngularFirestore,
     private file: File,
     private achieve: Achievements,
-    private toast: ToastNotification
+    private toast: ToastNotification,
+    private category: Networkcategories
   ) { }
 
   getFirestoreUserByName(name) {
@@ -68,7 +71,7 @@ export class FirestoreService {
     await this.fs.firestore.collection(collection).doc(cloudId).delete();
   }
 
-  async saveCloudCardSet(quiz: any, collection) {
+  async saveCloudCardSet(quiz: any, collection: string) {
     const batch = this.fs.firestore.batch();
     const newFSQuiz = this.fs.firestore.collection(collection).doc();
 
@@ -105,17 +108,17 @@ export class FirestoreService {
       batch.set(cardRef, cards[i]);
 
       if (withImages && cards[i].c_image && cards[i].c_image !== '') {
-        this.uploadStorageImage(cloudId, cards[i], 'cloud');
+        this.uploadStorageImage(cloudId, cards[i].image_path, 'cloud');
       }
     }
     await batch.commit();
   }
 
-  async uploadStorageImage(cloudId: string, card: Card, base: string) {
+  async uploadStorageImage(cloudId: string, image_path: string, base: string) {
     const storageloc = base + '/' + cloudId;
     const storageRef = firebase.storage().ref();
-    const fp = card.image_path.substr(0, card.image_path.lastIndexOf('/') + 1);
-    const fn = card.image_path.substr(card.image_path.lastIndexOf('/') + 1);
+    const fp = image_path.substr(0, image_path.lastIndexOf('/') + 1);
+    const fn = image_path.substr(image_path.lastIndexOf('/') + 1);
     // this.toast.loadToast('Uploading image... ' + i);
     this.file.readAsArrayBuffer(fp, fn).then(ab => {
       const blob = new Blob([ab], {type: 'image/jpg'});
@@ -156,16 +159,119 @@ export class FirestoreService {
       .get();
   }
 
-  async getNetworkQuizzes() {
-    return (await this.fs.firestore.collection('network_quizzes')
-      .where('isActive', '==', true)
-      .get())
-      .docs
+  async getNetworkQuizzes(doc = '', cat = '', subcat = '') {
+
+    if (subcat) return this.getNetworkQuizzesBySubcat(doc, cat, subcat);
+    else if (cat) return this.getNetworkQuizzesByCat(doc, cat);
+    else return this.getNetworkQuizzesLatest(doc);
+  }
+
+  private async getNetworkQuizzesLatest(doc) {
+    if (doc) {
+      const docRef = this.fs.firestore.collection('network_quizzes').doc(doc);
+      return (await docRef.get().then(snapshot => {
+        const startAtSnapshot = this.fs.firestore.collection('network_quizzes')
+          .where('isActive', '==', true)
+          .orderBy('quizpublishtimestamp', 'desc')
+          .startAfter(snapshot);
+
+        return startAtSnapshot.limit(15).get();
+      })).docs
       .map(q => {
         return {
           ...q.data()
         } as NWQuiz;
       });
+    } else {
+      return (await this.fs.firestore.collection('network_quizzes')
+          .where('isActive', '==', true)
+          .orderBy('quizpublishtimestamp', 'desc')
+          .limit(15)
+          .get())
+        .docs
+        .map(q => {
+          return {
+            ...q.data()
+          } as NWQuiz;
+        });
+    }
+  }
+
+  private async getNetworkQuizzesByCat(doc, cat) {
+    if (doc) {
+      const docRef = this.fs.firestore.collection('network_quizzes').doc(doc);
+      return (await docRef.get().then(snapshot => {
+        const startAtSnapshot = this.fs.firestore.collection('network_quizzes')
+          .where('isActive', '==', true)
+          .where('quizcategory', '==', cat)
+          .startAfter(snapshot);
+
+        return startAtSnapshot.limit(15).get();
+      })).docs
+      .map(q => {
+        return {
+          ...q.data()
+        } as NWQuiz;
+      });
+    } else {
+      return (await this.fs.firestore.collection('network_quizzes')
+          .where('isActive', '==', true)
+          .where('quizcategory', '==', cat)
+          .limit(15)
+          .get())
+        .docs
+        .map(q => {
+          return {
+            ...q.data()
+          } as NWQuiz;
+        });
+    }
+  }
+
+  private async getNetworkQuizzesBySubcat(doc, cat, subcat) {
+    const subcatkey = this.category.subcatKey(cat, subcat);
+    if (doc) {
+      const docRef = this.fs.firestore.collection('network_quizzes').doc(doc);
+      return (await docRef.get().then(snapshot => {
+        const startAtSnapshot = this.fs.firestore.collection('network_quizzes')
+          .where('isActive', '==', true)
+          .where('quizsubcatkey', '==', subcatkey)
+          .startAfter(snapshot);
+
+        return startAtSnapshot.limit(15).get();
+      })).docs
+      .map(q => {
+        return {
+          ...q.data()
+        } as NWQuiz;
+      });
+    } else {
+      return (await this.fs.firestore.collection('network_quizzes')
+          .where('isActive', '==', true)
+          .where('quizsubcatkey', '==', subcatkey)
+          .limit(15)
+          .get())
+        .docs
+        .map(q => {
+          return {
+            ...q.data()
+          } as NWQuiz;
+        });
+    }
+  }
+
+  async getNetworkQuizCards(cloudId: string) {
+    return new Promise<string>((res, rej) => {
+      this.fs.firestore.collection('network_quizzes')
+      .doc(cloudId)
+      .get()
+      .then(snapshot => {
+        res(snapshot.data().quizData);
+      })
+      .catch(error => {
+        rej();
+      });
+    });
   }
 
   async updateCloudDownloadCount(cloudId, collection) {
@@ -177,11 +283,27 @@ export class FirestoreService {
       });
   }
 
-  async deleteStorageFiles(cloudId, base: string) {
-    const ref = firebase.storage().ref(base + '/' + cloudId) as any;
-    const dir = await ref.listAll();
-    dir.items.forEach(fileRef => {
-      ref.child(fileRef).delete();
+  async deleteStorageFile(cloudId: string, base: string, file: string) {
+    return new Promise((res) => {
+      const ref = firebase.storage().ref(base + '/' + cloudId) as any;
+      ref.child(file).delete();
+      res();
+    });
+  }
+
+  async deleteStorageFiles(cloudId: string, base: string) {
+    return new Promise((res) => {
+      const ref = firebase.storage().ref(base + '/' + cloudId) as any;
+      // ref.child('1583876445489.jpg').delete();
+      // res();
+      ref.listAll()
+        .then(dir => {
+          dir.forEach(fileRef => {
+            ref.child(fileRef).delete();
+          });
+          res();
+        })
+        .catch(() => res());
     });
   }
 
@@ -191,5 +313,9 @@ export class FirestoreService {
     dir.items.forEach(fileRef => {
       ref.child(fileRef).getDownloadUrl();
     });
+  }
+
+  async getLatestNews() {
+    return (await this.fs.firestore.collection('latest_news').doc('jsonstring').get()).data().value;
   }
 }

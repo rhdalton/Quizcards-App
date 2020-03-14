@@ -3,6 +3,7 @@ import { AppdataClass } from '../shared/classes/appdata';
 import { AppSettings } from '../models/appsettings';
 import { Router } from '@angular/router';
 import { NetworkService } from '../services/network.service';
+import { FirestoreService } from '../services/firestore.service';
 
 @Component({
   selector: 'app-tabmore',
@@ -10,20 +11,28 @@ import { NetworkService } from '../services/network.service';
   styleUrls: ['./tabmore.page.scss'],
 })
 export class TabmorePage implements OnInit {
-  _app: AppSettings;
+  app: AppSettings;
   isPro = false;
+  latestNews: any = {};
 
   constructor(
-    private app: AppdataClass,
+    private _app: AppdataClass,
     private router: Router,
-    private network: NetworkService
+    private network: NetworkService,
+    private firebase: FirestoreService
   ) { }
 
-  ngOnInit() { }
+  async ngOnInit() {
+    if (this.network.isOnline()) {
+      const ls = await this.firebase.getLatestNews();
+      this.latestNews = JSON.parse(ls);
+      console.log(this.latestNews);
+    }
+  }
 
   async ionViewWillEnter() {
-    this._app = await this.app.getAppSettings();
-    this.isPro = this.app.isPro(this._app.userStatus);
+    this.app = await this._app.getAppSettings();
+    this.isPro = this._app.isPro(this.app.userStatus);
   }
 
   gotoCommunity() {

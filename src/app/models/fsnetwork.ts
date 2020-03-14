@@ -8,11 +8,12 @@ export interface NWQuiz {
   quizcategory: string;
   quizsubcat: string;
   quizsubcatkey: string;
-  quiztts: string;
   quizauthor: string;
   quizpublishdate: Date;
-  audioquiz: boolean;
-  imagequiz: boolean;
+  quizpublishtimestamp: number;
+  audioData: string;
+  imageData: string;
+  quizData: string;
   quizdownloads: number;
   quizrating: number;
   cardcount: number;
@@ -20,4 +21,5 @@ export interface NWQuiz {
   purchasePrice: number;
   productId: string;
   isActive: boolean;
+  quiztts?: string;
 }

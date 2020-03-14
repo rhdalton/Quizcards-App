@@ -7,6 +7,7 @@ import { WebView } from '@ionic-native/ionic-webview/ngx';
 import { Platform, AlertController } from '@ionic/angular';
 import * as firebase from 'firebase/app';
 import { Card } from 'src/app/models/card';
+import { ExportCard } from 'src/app/models/exportcard';
 
 import { ToastNotification } from '../shared/classes/toast';
 
@@ -99,17 +100,17 @@ export class ImageService {
     this.toast.loadToast('Image removed.');
   }
 
-  async downloadImagesFromCloudStorage(cloudId, Cards: Card[], base: string) {
+  async downloadImagesFromCloudStorageJson(cloudId, Cards: ExportCard[], base: string) {
     const storagepath = base + '/' + cloudId;
     for (let i = 0; i < Cards.length; i++) {
 
-      if (Cards[i].c_image !== '') {
-        const fn = Cards[i].image_path.substr(Cards[i].image_path.lastIndexOf('/') + 1);
+      if (Cards[i].img && Cards[i].img !== '') {
+        const fn = Cards[i].imgp.substr(Cards[i].imgp.lastIndexOf('/') + 1);
         const imgUrl = await this.storageRef.child(storagepath + '/' + fn).getDownloadURL();
-        const downloadedImage = await this.downloadFirebaseImageToDevice(imgUrl);
+        const downloadedImage = await this.downloadFirebaseImageToDevice(imgUrl, fn);
         // this.toast.loadToast(downloadedImage.c_image + '@' + downloadedImage.image_path, 15);
-        Cards[i].c_image = downloadedImage.c_image;
-        Cards[i].image_path = downloadedImage.image_path;
+        Cards[i].img = downloadedImage.c_image;
+        Cards[i].imgp = downloadedImage.image_path;
       }
     }
     return Cards;

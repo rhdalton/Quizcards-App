@@ -41,6 +41,7 @@ import { NetworkService } from 'src/app/services/network.service';
 export class CardsetpopoverComponent {
   pop: PopoverController;
   quizid;
+  cardcount;
   isBackable;
   isMergeable;
   isShareable;
@@ -55,6 +56,7 @@ export class CardsetpopoverComponent {
 
     this.quizid = params.get('quizid');
     this.pop = params.get('popover');
+    this.cardcount = params.get('cardcount');
     this.isBackable = (params.get('isBackable') === 1) ? true : false;
     this.isMergeable = (params.get('isMergeable') === 1) ? true : false;
     this.isShareable = (params.get('isShareable') === 1) ? true : false;
@@ -84,11 +86,32 @@ export class CardsetpopoverComponent {
   }
 
   mergeSets() {
+    if (this.cardcount === 0) {
+      this.pop.dismiss();
+      this.alert.create({
+        header: 'No Cards',
+        message: 'There are no cards in this set to merge!',
+        buttons: [
+          { text: 'Close', role: 'cancel' }
+        ]
+      }).then(a => a.present());
+      return;
+    }
     this.params.get('mergeModal')();
   }
 
   async sortSet() {
     this.pop.dismiss();
+    if (this.cardcount === 0) {
+      this.alert.create({
+        header: 'No Cards',
+        message: 'There are no cards in this set to sort!',
+        buttons: [
+          { text: 'Close', role: 'cancel' }
+        ]
+      }).then(a => a.present());
+      return;
+    }
     this.alert.create({
       header: 'Reorder Cards',
       message: 'This will permanently re-order the cards in this set in Aphabetical order by Card Text. Click Reorder to continue.',
@@ -100,6 +123,17 @@ export class CardsetpopoverComponent {
   }
 
   backupToCloud() {
+    if (this.cardcount === 0) {
+      this.pop.dismiss();
+      this.alert.create({
+        header: 'No Cards',
+        message: 'There are no cards in this set to backup!',
+        buttons: [
+          { text: 'Close', role: 'cancel' }
+        ]
+      }).then(a => a.present());
+      return;
+    }
     this.params.get('backupToCloud')();
   }
 
@@ -107,6 +141,16 @@ export class CardsetpopoverComponent {
     this.pop.dismiss();
     if (!this.network.isOnline()) {
       this.network.alertOffline('share a card set');
+      return;
+    }
+    if (this.cardcount === 0) {
+      this.alert.create({
+        header: 'No Cards',
+        message: 'There are no cards in this set to share!',
+        buttons: [
+          { text: 'Close', role: 'cancel' }
+        ]
+      }).then(a => a.present());
       return;
     }
     this.router.navigate(['/tabs/tabmore/share', this.quizid]);
@@ -127,6 +171,17 @@ export class CardsetpopoverComponent {
   }
 
   exportToDevice() {
+    if (this.cardcount === 0) {
+      this.pop.dismiss();
+      this.alert.create({
+        header: 'No Cards',
+        message: 'There are no cards in this set to export!',
+        buttons: [
+          { text: 'Close', role: 'cancel' }
+        ]
+      }).then(a => a.present());
+      return;
+    }
     this.params.get('exportToDevice')();
   }
 }

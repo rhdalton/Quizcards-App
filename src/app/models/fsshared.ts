@@ -12,5 +12,5 @@ export interface FSShared {
   shareDatetime: string;
   shareTo: string;
   quizData: string;
-  hasImages: boolean;
+  imageData: string;
 }

@@ -46,14 +46,14 @@ export class QuizcardsExport implements OnInit {
     for (const c of cards) {
       const cardJson = {
         txt: c.c_text,
-        subtxt: c.c_subtext,
-        ans: c.c_correct,
+        subtxt: (c.c_subtext) ? c.c_subtext : undefined,
+        ans: (c.c_correct === c.c_study) ? undefined : c.c_correct,
         study: c.c_study,
-        substudy: c.c_substudy,
-        img: c.c_image,
-        imgp: c.image_path,
-        audio: c.c_audio,
-        audiop: c.audio_path
+        substudy: (c.c_substudy) ? c.c_substudy : undefined,
+        img: (c.c_image) ? c.c_image : undefined,
+        imgp: (c.image_path) ? c.image_path : undefined,
+        audio: (c.c_audio) ? c.c_audio : undefined,
+        audiop: (c.audio_path) ? c.audio_path : undefined
       } as ExportCard;
       quizJson.cards.push(cardJson);
     }
@@ -174,7 +174,7 @@ export class QuizcardsExport implements OnInit {
       });
   }
 
-  async importQuiz(quizdata: ExportQuiz) {
+  async importQuiz(quizdata: ExportQuiz, extras: any = {}) {
 
     const quiz: Quiz = {
       id: quizdata.quizid,
@@ -189,7 +189,7 @@ export class QuizcardsExport implements OnInit {
       isShareable: 1,
       isPurchased: 0,
       cloudId: '',
-      networkId: '',
+      networkId: (extras.networkId) ? extras.networkId : '',
       shareId: '',
       creator_name: '',
       tts: '',
@@ -212,15 +212,15 @@ export class QuizcardsExport implements OnInit {
         id: uuid.v1(),
         quiz_id: quizId,
         c_text: importcards[i].txt,
-        c_subtext: importcards[i].subtxt,
-        c_image: importcards[i].img,
-        image_path: importcards[i].imgp,
-        c_audio: importcards[i].audio,
-        audio_path: importcards[i].audiop,
+        c_subtext: (importcards[i].subtxt) ? importcards[i].subtxt : '',
+        c_image: (importcards[i].img) ? importcards[i].img : '',
+        image_path: (importcards[i].imgp) ? importcards[i].imgp : '',
+        c_audio: (importcards[i].audio) ? importcards[i].audio : '',
+        audio_path: (importcards[i].audiop) ? importcards[i].audiop : '',
         c_video: '',
-        c_correct: importcards[i].ans,
+        c_correct: (importcards[i].ans) ? importcards[i].ans : importcards[i].study,
         c_study: importcards[i].study,
-        c_substudy: importcards[i].substudy,
+        c_substudy: (importcards[i].substudy) ? importcards[i].substudy : '',
         cardorder: i,
         correct_count: 0,
         is_hidden: 0

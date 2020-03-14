@@ -52,6 +52,20 @@ export class SharecodeComponent implements OnInit {
     });
   }
 
+  async alertData() {
+    this._loader.dismiss();
+    return new Promise(async (res) => {
+      this.alert.create({
+        header: 'Card Set Images',
+        message: 'This card set contains Images. Downloading this set may use extra data on your device\'s Internet data plan based on the number of images ' +
+          'that require downloading. Do you want to continue with the download of this set and all images?',
+        buttons: [
+          { text: 'Cancel', role: 'cancel', handler: () => res(false) },
+          { text: 'Continue', handler: () => res(true) }
+        ]
+      }).then(a => a.present());
+    });
+  }
 
   async submitCode(code) {
     const cleancode = code.sharecode.toLowerCase().trim().toString();
@@ -82,7 +96,15 @@ export class SharecodeComponent implements OnInit {
     const sharedQuizJson: ExportQuiz = JSON.parse(sharedQuiz.quizData);
 
     this._loader.dismiss();
-    if (!this._isPro && sharedQuiz.hasImages) {
+
+    if (sharedQuiz.imageData && sharedQuiz.imageData !== '') {
+      if (!await this.alertData()) {
+        this.toast.loadToast('Cardset download canceled.');
+        return;
+      }
+    }
+
+    if (!this._isPro && sharedQuiz.imageData) {
       if (await this.alertImages()) {
         for (let i = 0; i < sharedQuizJson.cards.length; i++) {
           sharedQuizJson.cards[i].img = '';
@@ -103,7 +125,7 @@ export class SharecodeComponent implements OnInit {
     sharedQuizJson.quizid = uuid.v1();
     await this.quizjson.importQuiz(sharedQuizJson);
 
-    if (sharedQuiz.hasImages) {
+    if (sharedQuiz.imageData) {
       for (let i = 0; i < sharedQuizJson.cards.length; i++) {
         if (sharedQuizJson.cards[i].img !== '') {
           const fn = sharedQuizJson.cards[i].imgp.substr(sharedQuizJson.cards[i].imgp.lastIndexOf('/') + 1);

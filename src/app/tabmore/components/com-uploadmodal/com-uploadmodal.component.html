@@ -20,7 +20,7 @@
   <div *ngIf="current_cat !== ''" class="form-group">
     <select [(ngModel)]="current_subcat" name="current_subcat" class="input-select bgfocus" style="width:100%;">
       <option value="">-- Select Subcategory</option>
-      <option *ngFor="let s of subcat" value="{{ s }}">{{ s }}</option>
+      <option *ngFor="let s of subcatList" value="{{ s }}">{{ s }}</option>
     </select>
   </div>
   <div class="form-group">
@@ -32,6 +32,6 @@
   </div>
   
   <div style="width:100%;text-align:center;margin-top:10px">
-    <ion-button type="submit" style="font-size:16px">Upload</ion-button>
+    <ion-button type="submit" style="font-size:16px">{{ uploadButton }}</ion-button>
   </div>
 </form> 

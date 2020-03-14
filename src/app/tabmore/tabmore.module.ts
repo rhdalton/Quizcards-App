@@ -57,7 +57,6 @@ const routes: Routes = [
     ComUploadmodalComponent
   ],
   providers: [
-    Networkcategories
   ]
 })
 export class TabmorePageModule {}

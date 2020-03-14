@@ -34,23 +34,27 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card 
-    *ngFor="let c of filteredCards; let i = index" 
-    class="qcard cardlist quiz-color-white" 
-    [class.compact-view]="allCards.length>0 && Quiz.cardview=='compact-view'"
-    [class.hidden-card]="c.is_hidden == 1">
-    <ion-card-content>
-      <div class="right">
-        <div (click)="cardOptions($event, c.id, i, c.is_hidden)" class="edit-card" [class.hidden-edit]="c.is_hidden"></div>
-      </div>
-        {{ i + 1 }}. 
-        <img *ngIf="c.c_image && Quiz.cardview=='detail-view'" class="card-image image-small" src="{{ c.c_image }}">
-        <img *ngIf="c.c_image && Quiz.cardview=='compact-view'" src="assets/icon/uploadimage.svg" style="vertical-align:top;display:inline-block;width:25px;">
-        <img *ngIf="c.c_audio" src="assets/icon/audiofile.svg" style="vertical-align:top;display:inline-block;width:23px;">
-        <span *ngIf="c.c_audio && Quiz.cardview=='detail-view'" class="sm">&nbsp; [{{c.c_audio}}]<br /></span>
-        {{c.c_text}}
-      <div *ngIf="Quiz.cardview=='detail-view'" class="card-detail">{{c.c_correct}}</div>
-    </ion-card-content>
-  </ion-card>
-
+  <ion-virtual-scroll [items]="filteredCards" approxItemHeight="80px">
+    <ion-card 
+      *virtualItem="let c; let i = index" 
+      class="qcard cardlist quiz-color-white" 
+      [class.compact-view]="allCards.length>0 && Quiz.cardview=='compact-view'"
+      [class.hidden-card]="c.is_hidden == 1">
+      <ion-card-content>
+        <div class="right">
+          <div (click)="cardOptions($event, c.id, i, c.is_hidden)" class="edit-card" [class.hidden-edit]="c.is_hidden"></div>
+        </div>
+          {{ i + 1 }}. 
+          <div *ngIf="c.c_image && Quiz.cardview=='detail-view'">
+            <ion-img  class="card-image image-small" [src]="c.c_image"></ion-img>
+          </div>
+          <img *ngIf="c.c_image && Quiz.cardview=='compact-view'" src="assets/icon/uploadimage.svg" style="vertical-align:top;display:inline-block;width:23px;">
+          <img *ngIf="c.c_audio" src="assets/icon/audiofile.svg" style="vertical-align:top;display:inline-block;width:23px;">
+          <span *ngIf="c.c_audio && Quiz.cardview=='detail-view'" class="sm">&nbsp; [{{c.c_audio}}]<br /></span>
+          {{c.c_text}}
+        <div *ngIf="Quiz.cardview=='detail-view'" class="card-detail">{{c.c_correct}}</div>
+      </ion-card-content>
+    </ion-card>
+  </ion-virtual-scroll>
+  <div style="padding-top:50px;"></div>
 </ion-content>

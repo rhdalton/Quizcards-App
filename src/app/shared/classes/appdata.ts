@@ -12,7 +12,7 @@ export class AppdataClass {
 
   constructor(
     private storage: Storage) {
-    this.appv = 11.25;
+    this.appv = 11.28;
     this.latestdbv = 1.4;
   }
 

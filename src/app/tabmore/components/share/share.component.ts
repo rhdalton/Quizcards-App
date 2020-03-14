@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Quiz } from 'src/app/models/quiz';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SqliteService } from 'src/app/services/sqlite.service';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { AppSettings } from 'src/app/models/appsettings';
@@ -27,7 +27,10 @@ export class ShareComponent implements OnInit {
   _app: AppSettings;
   _hasImages = false;
   _hasAudio = false;
+  _imageData: any[];
+  _imagePathData: any[];
   _loader;
+  _currentSharedSet: FSShared;
   User: User;
   Quiz: Quiz;
   shareCode: string;
@@ -36,6 +39,7 @@ export class ShareComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private route: ActivatedRoute,
+    private router: Router,
     private sqlite: SqliteService,
     private app: AppdataClass,
     private alert: AlertController,
@@ -65,12 +69,18 @@ export class ShareComponent implements OnInit {
 
   async shareToFriends() {
 
-    // check if cards have images
+    this._imageData = [];
+    this._imagePathData = [];
+
+    // check if cards have images/audio
     const cards: Card[] = await this.sqlite.getQuizCards(this.Quiz.id);
     for (let i = 0; i < cards.length; i++) {
-      if (cards[i].c_image && cards[i].c_image !== '') this._hasImages = true;
+      if (cards[i].c_image && cards[i].c_image !== '') {
+        this._hasImages = true;
+        this._imagePathData.push(cards[i].image_path);
+        this._imageData.push(cards[i].c_image.substr(cards[i].c_image.lastIndexOf('/') + 1));
+      }
       if (cards[i].c_audio && cards[i].c_audio !== '') this._hasAudio = true;
-      if (this._hasImages && this._hasAudio) break;
     }
 
     if (!this._isPro && this._hasImages) {
@@ -79,16 +89,21 @@ export class ShareComponent implements OnInit {
         message: 'This QuizCard set contains images. Images can only be shared with a Pro Account. Please upgrade to Pro to share this QuizCard set.',
         buttons: ['OK']
       }).then(a => a.present());
+      this.router.navigate(['/tabs/tabmanage/cards', this._quizId]);
       return;
     }
 
-    if (await this.notifyAudio()) {
-      for (let i = 0; i < cards.length; i++) {
-        cards[i].c_audio = '';
-        cards[i].audio_path = '';
+    if (this._hasAudio) {
+      if (await this.notifyAudio()) {
+        for (let i = 0; i < cards.length; i++) {
+          cards[i].c_audio = '';
+          cards[i].audio_path = '';
+        }
+      } else {
+        this.toast.loadToast('Share card set canceled.');
+        this.router.navigate(['/tabs/tabmanage/cards', this._quizId]);
+        return;
       }
-    } else {
-      return;
     }
 
     this._loader = await this.load.create({ message: 'Generating share code...' });
@@ -101,11 +116,11 @@ export class ShareComponent implements OnInit {
 
     } else {
       // get current shared quiz if exists
-      const sharedQuiz = (await this.firestoreService.getFirestoreQuiz(this.Quiz.shareId, 'user_shared_cardsets')).data() as FSShared;
+      this._currentSharedSet = (await this.firestoreService.getFirestoreQuiz(this.Quiz.shareId, 'user_shared_cardsets')).data() as FSShared;
 
-      console.log('shared quiz', sharedQuiz);
+      // console.log('shared quiz', sharedQuiz);
 
-      if (!sharedQuiz) {
+      if (!this._currentSharedSet) {
 
         // if sharequiz not found, then already deleted, treat like new share quiz
         await this.uploadNewShareQuiz(cards);
@@ -144,10 +159,8 @@ export class ShareComponent implements OnInit {
     const sharedSet = await this.firestoreService.saveCloudCardSet(newShareQuiz, 'user_shared_cardsets');
     if (sharedSet.id) {
       await this.sqlite.updateQuizFirestoreId(this.Quiz.id, sharedSet.id, 'share');
-      for (let i = 0; i < cards.length; i++) {
-        if (cards[i].c_image && cards[i].c_image !== '') {
-          this.firestoreService.uploadStorageImage(sharedSet.id, cards[i], 'shared');
-        }
+      for (let i = 0; i < this._imagePathData.length; i++) {
+        this.firestoreService.uploadStorageImage(sharedSet.id, this._imagePathData[i], 'shared');
       }
     }
 
@@ -157,11 +170,28 @@ export class ShareComponent implements OnInit {
 
   async updateCurrentSharedSet(cards: Card[]) {
 
+
     this.shareCode = this.makeShareCode(8);
     const updateShareQuiz: FSShared = this.createShareQuizObject(cards);
 
     await this.firestoreService.updateCloudCardSet(updateShareQuiz, 'user_shared_cardsets');
-    // await this.firestoreService.saveCloudSetCards(sharedQuiz.shareId, cards, 'user_shared_quizzes', true);
+
+    // delete images from prev shared imageData NOT in new Synced card set imageData
+    const prevImageData = (this._currentSharedSet.imageData) ? JSON.parse(this._currentSharedSet.imageData) : [];
+    for (let i = 0; i < prevImageData.length; i++) {
+      if (!this._imageData.includes(prevImageData[i])) {
+        await this.firestoreService.deleteStorageFile(this.Quiz.shareId, 'shared', prevImageData[i]);
+      }
+    }
+
+    // upload new images not already in prev shared imageData
+    for (let i = 0; i < this._imagePathData.length; i++) {
+      const fn = this._imagePathData[i].substr(this._imagePathData[i].lastIndexOf('/') + 1);
+      if (!prevImageData.includes(fn)) {
+        this.firestoreService.uploadStorageImage(this.Quiz.shareId, this._imagePathData[i], 'shared');
+      }
+    }
+
 
     this._loader.dismiss();
     this.shareComplete = true;
@@ -182,7 +212,7 @@ export class ShareComponent implements OnInit {
       shareDatetime: firestore.Timestamp.now().toDate().toString(),
       shareTo: '',
       quizData: this.quizjson.quizToJson(this.Quiz, cards),
-      hasImages: this._hasImages
+      imageData: (this._imageData.length > 0) ? JSON.stringify(this._imageData) : ''
     } as FSShared;
   }
 

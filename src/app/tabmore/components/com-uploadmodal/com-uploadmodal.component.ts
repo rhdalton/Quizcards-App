@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NavParams, LoadingController } from '@ionic/angular';
+import { NavParams, LoadingController, AlertController } from '@ionic/angular';
 import { Quiz } from 'src/app/models/quiz';
 import { NWQuiz } from 'src/app/models/fsnetwork';
 import { User } from 'src/app/models/user';
@@ -9,6 +9,8 @@ import { FirestoreService } from 'src/app/services/firestore.service';
 import { SqliteService } from 'src/app/services/sqlite.service';
 import { Card } from 'src/app/models/card';
 import { NWCard } from 'src/app/models/nwcard';
+import { QuizcardsExport } from 'src/app/shared/classes/quizcardsexport';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-com-uploadmodal',
@@ -21,14 +23,15 @@ export class ComUploadmodalComponent implements OnInit {
   Quiz: Quiz;
   NWQuiz: NWQuiz;
   User: User;
+  uploadButton = 'Upload';
   categoryList;
+  subcatList = [];
   lang_subcat;
   subj_subcat;
   oth_subcat;
-  current_cat;
-  current_subcat;
-  subcat;
-  quizdesc;
+  current_cat = '';
+  current_subcat = '';
+  quizdesc = '';
   alertMessage = '';
 
   constructor(
@@ -36,7 +39,10 @@ export class ComUploadmodalComponent implements OnInit {
     private sqlite: SqliteService,
     private cats: Networkcategories,
     private params: NavParams,
-    private load: LoadingController
+    private load: LoadingController,
+    private exportquiz: QuizcardsExport,
+    private alert: AlertController,
+    private router: Router
   ) {
     this.modal = this.params.get('modal');
     this.Quiz = this.params.get('quiz');
@@ -46,16 +52,18 @@ export class ComUploadmodalComponent implements OnInit {
     this.lang_subcat = this.cats.getLang_subcat;
     this.subj_subcat = this.cats.getSubj_subcat;
     this.oth_subcat = this.cats.getOth_subcat;
-    this.subcat = [];
   }
 
   ngOnInit() {
     // console.log(this.Quiz);
     if (this.Quiz.networkId) {
-      this.current_cat = this.NWQuiz.quizcategory;
-      this.changeCat();
-      this.current_subcat = this.NWQuiz.quizsubcat;
-      this.quizdesc = this.NWQuiz.quizdesc;
+      this.uploadButton = 'Upload Changes';
+      if (this.NWQuiz) {
+        this.current_cat = this.NWQuiz.quizcategory;
+        this.changeCat();
+        this.current_subcat = this.NWQuiz.quizsubcat;
+        this.quizdesc = this.NWQuiz.quizdesc;
+      }
     } else {
       this.current_cat = '';
     }
@@ -69,10 +77,14 @@ export class ComUploadmodalComponent implements OnInit {
         return;
     }
 
-    this._loader = await this.load.create({ message: 'Uploading card set...' });
+    this._loader = await this.load.create({ message: 'Uploading QuizCard set...' });
     this._loader.present();
 
-    if (this.Quiz.networkId && this.Quiz.networkId !== '') {
+    const quizCards: Card[] = await this.sqlite.getQuizCards(this.Quiz.id);
+    const quizJsonString = this.exportquiz.quizToJson(this.Quiz, quizCards);
+
+    // Upload REPLACEMENT QUIZ
+    if (this.Quiz.networkId && this.Quiz.networkId !== '' && this.NWQuiz) {
 
       const updateQuiz: NWQuiz = {
         ...this.NWQuiz,
@@ -82,16 +94,15 @@ export class ComUploadmodalComponent implements OnInit {
         cardcount: this.Quiz.cardcount,
         quizcategory: form.current_cat,
         quizsubcat: form.current_subcat,
-        quizsubcatkey: form.current_cat.substr(0, 3).toLowerCase() + '-' + form.current_subcat.toLowerCase(),
-        quiztts: (this.Quiz.tts) ? this.Quiz.tts : '',
+        quizsubcatkey: this.cats.subcatKey(form.current_cat, form.current_subcat),
         quizpublishdate: firestore.Timestamp.now().toDate(),
+        quizpublishtimestamp: firestore.Timestamp.now().seconds,
+        quizData: quizJsonString,
         quizdownloads: 0,
         quizrating: 0
       };
 
       await this.firestoreService.updateCloudCardSet(updateQuiz, 'network_quizzes');
-
-      this.addNetworkCards(this.Quiz.networkId);
 
     // ELSE upload NEW Quiz
     } else {
@@ -104,12 +115,13 @@ export class ComUploadmodalComponent implements OnInit {
         quizdesc: form.quizdesc,
         quizcategory: form.current_cat,
         quizsubcat: form.current_subcat,
-        quizsubcatkey: form.current_cat.substr(0, 3).toLowerCase() + '-' + form.current_subcat.toLowerCase(),
-        quiztts: this.Quiz.tts,
+        quizsubcatkey: this.cats.subcatKey(form.current_cat, form.current_subcat),
         quizauthor: this.User.displayName,
         quizpublishdate: firestore.Timestamp.now().toDate(),
-        audioquiz: false,
-        imagequiz: false,
+        quizpublishtimestamp: firestore.Timestamp.now().seconds,
+        audioData: '',
+        imageData: '',
+        quizData: quizJsonString,
         quizdownloads: 0,
         quizrating: 0,
         cardcount: this.Quiz.cardcount,
@@ -121,51 +133,25 @@ export class ComUploadmodalComponent implements OnInit {
 
       const result = await this.firestoreService.saveCloudCardSet(newQuiz, 'network_quizzes');
       await this.sqlite.updateQuizFirestoreId(this.Quiz.id, result.id, 'network');
+      this.Quiz.networkId = result.id;
 
-      await this.addNetworkCards(result.id);
+      // await this.addNetworkCards(result.id);
     }
     this.modal.dismiss();
+    this.router.navigate(['/tabs/tabhome']);
     this._loader.dismiss();
-  }
-
-  async addNetworkCards(networkId) {
-
-    const quizCards: Card[] = await this.sqlite.getQuizCards(this.Quiz.id);
-    const newCards = [];
-
-    for (let i = 0; i < quizCards.length; i++) {
-      const card: NWCard = {
-        id: quizCards[i].id,
-        networkId: networkId,
-        quiz_id: quizCards[i].quiz_id,
-        ctext: quizCards[i].c_text,
-        csubtext: (quizCards[i].c_subtext) ? quizCards[i].c_subtext : '',
-        canswer: quizCards[i].c_correct,
-        cstudy: quizCards[i].c_correct,
-        csubstudy: '',
-        cardorder: quizCards[i].cardorder,
-        cimage: '',
-        caudio: ''
-      };
-      newCards.push(card);
-    }
-    await this.firestoreService.saveCloudSetCards(networkId, newCards, 'network_quizzes');
+    this.alert.create({
+      header: 'Upload Success!',
+      message: 'You\'ve successfully uploaded this QuizCard set to the community! If you make changes to this set, you can update the community set by uploading again.',
+      buttons: ['OK']
+    }).then(a => a.present());
   }
 
   async changeCat() {
-    switch (this.current_cat) {
-      case 'Languages':
-        this.subcat = this.lang_subcat;
-        break;
-      case 'Subjects':
-        this.subcat = this.subj_subcat;
-        break;
-      case 'Other':
-        this.subcat = this.oth_subcat;
-        break;
-      default:
-        this.subcat = [];
+    if (this.current_cat) {
+      this.subcatList = this.cats.getSubCats(this.current_cat);
+    } else {
+      this.current_subcat = "";
     }
-    this.current_subcat = '';
   }
 }
