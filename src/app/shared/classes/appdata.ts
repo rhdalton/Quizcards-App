@@ -13,7 +13,7 @@ export class AppdataClass {
   constructor(
     private storage: Storage) {
     this.appv = 11.34;
-    this.latestdbv = 1.5;
+    this.latestdbv = 1.4;
   }
 
   async getAppSettings() {
