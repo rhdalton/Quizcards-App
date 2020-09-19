@@ -208,7 +208,7 @@ export class SqliteService {
         this._apps.dbVersion = 1.5;
       }
 
-      this._apps.dbVersion = 1.5;
+      this._apps.dbVersion = 1.4;
 
       await this.app.setAppSettings(this._apps);
     }
