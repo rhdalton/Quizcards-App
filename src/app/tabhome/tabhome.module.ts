@@ -9,6 +9,7 @@ import { QuiztypeComponent } from './components/quiztype/quiztype.component';
 import { QuizresultComponent } from './components/quizresult/quizresult.component';
 import { QuizClass } from '../shared/classes/quiz';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
+import { QuizcardsComponent } from '../tabmanage/components/quizcards/quizcards.component';
 
 @NgModule({
   imports: [

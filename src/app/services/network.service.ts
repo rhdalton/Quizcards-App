@@ -26,8 +26,8 @@ export class NetworkService {
 
   alertOffline(msg) {
     this.alert.create({
-      header: "Network Offline",
-      message: "An Internet connection is required to " + msg + ". Check your network connection and try again.",
+      header: "Network Conneciton",
+      message: "An internet connection is required to " + msg + ". If you can't access this page, please check your network connection.",
       buttons: ['OK']
     }).then(a => a.present());
   }

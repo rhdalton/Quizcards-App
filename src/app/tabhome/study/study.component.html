@@ -10,39 +10,36 @@
           <ion-card-content>
             <div class="card-text {{fontsize}} {{qcardsize}}">              
               <div *ngIf="Quiz.switchtext==0; else switch" dir="ltr">
-                <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image study-center" src="{{Card.c_image}}" />
-                {{Card.c_text}}
-                <div [hidden]="!Card.c_subtext" class="sm card-subtext" dir="ltr">
-                  {{Card.c_subtext}}
-                </div>
+                <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image study-center" src="{{Card.c_image}}" /><!--
+                -->{{Card.c_text}}
+                <div [hidden]="!Card.c_subtext" class="sm card-subtext" dir="ltr">{{Card.c_subtext}}</div>
                 <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
                   <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(300, Card, Quiz)"></ion-icon>
                 </div>
               </div>
               <ng-template #switch>
-                <div dir="ltr">
-                  {{Card.c_study}}
-                  <div [hidden]="!Card.c_substudy" class="sm card-subtext" dir="ltr">
-                    {{Card.c_substudy}}
-                  </div>
+                <div dir="ltr"><!--
+                -->{{Card.c_study}}
+                  <div [hidden]="!Card.c_substudy" class="sm card-subtext" dir="ltr">{{Card.c_substudy}}</div>
                 </div>
               </ng-template>
 
-              <div class="card-options study-card-options">                
-                <div><img (click)="hideCard(Card)" src="assets/icon/hide.svg"></div>
+              <div class="card-options study-card-options">
+                <div><img (click)="deleteCardAlert(Card)" src="assets/icon/trashcan.svg"></div>      
+                <div><img (click)="hideCard(Card)" src="assets/icon/{{Card.is_hidden ? 'unhide' : 'hide'}}.svg"></div>
                 <div><img (click)="editCard(Card.id)" src="assets/icon/edit.svg"></div>
               </div>
             </div>
             <div class="card-answer bt {{fontsize}} {{qcardsize}}">
               <div [hidden]="!_viewAnswer">
-                <div *ngIf="Quiz.switchtext==0; else switchans" dir="ltr">
-                  {{Card.c_study}}
+                <div *ngIf="Quiz.switchtext==0; else switchans" dir="ltr"><!--
+                -->{{Card.c_study}}
                   <div [hidden]="!Card.c_substudy" class="sm card-substudy" dir="ltr">{{Card.c_substudy}}</div>
                 </div>
                 <ng-template #switchans>
                     <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image" src="{{Card.c_image}}" />
-                  <div dir="ltr">
-                    {{Card.c_text}}
+                  <div dir="ltr"><!--
+                  -->{{Card.c_text}}
                     <div [hidden]="!Card.c_substudy" class="sm card-substudy" dir="ltr">{{Card.c_subtext}}</div>
                     <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
                       <ion-icon name="volume-high" class="audio-small" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(300, Card)"></ion-icon>

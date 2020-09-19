@@ -13,6 +13,7 @@ import { QuizClass } from 'src/app/shared/classes/quiz';
 import { ToastNotification } from 'src/app/shared/classes/toast';
 import { Achievements } from 'src/app/shared/classes/achievements';
 import { PlayAudio } from 'src/app/shared/classes/playaudio';
+import { QuizcardsComponent } from 'src/app/tabmanage/components/quizcards/quizcards.component';
 
 @Component({
   selector: 'app-study',
@@ -171,8 +172,21 @@ export class StudyComponent implements OnInit {
   }
 
   async hideCard(card: Card) {
+    console.log(card.is_hidden);
+    if (card.is_hidden === 1) {
+      card.is_hidden = 0;
+      await this.sqlite.hideCard(card.id, this.quizId, true);
+      this.alert.create({
+        header: 'Card Un-Hidden',
+        message: 'This card has been restored to study and quiz modes.',
+        buttons: [
+          { text: 'OK' }
+        ]
+      }).then(a => a.present());
+      return;
+    }
+    card.is_hidden = 1;
     await this.sqlite.hideCard(card.id, this.quizId);
-
     this.alert.create({
       header: 'Card Hidden',
       message: 'This card has been hidden and will no longer appear in Study & Quiz modes. You will still be able to see it in Edit mode.',
@@ -185,6 +199,33 @@ export class StudyComponent implements OnInit {
   editCard(cardId) {
     this.audio.endAudio();
     this.router.navigate(['/tabs/tabmanage/card/', this.quizId, cardId]);
+  }
+
+  deleteCardAlert(card: Card) {
+    this.alert.create({
+      header: 'Delete Card',
+      message: 'Are you sure you want to delete this Card? This action cannot be un-done.',
+      buttons: [
+        { text: 'Cancel', role: 'cancel', handler: () => {} },
+        { text: 'Yes', handler: () => this.deleteCard(card) }
+      ]
+    }).then(a => a.present());
+  }
+
+  async deleteCard(card) {
+    if (this._app.rtl) this.prevCard();
+    else this.nextCard();
+    this.Cards.splice(card.cardorder, 1);
+    await this.sqlite.deleteCard(card, this.Cards, this.quizId);
+    // console.log('remaining', this.allCards);
+    console.log('card order: ', card.cardorder);
+    for (let i = card.cardorder; i < this.Cards.length; i++) {
+      this.Cards[i].cardorder -= 1;
+    }
+    // this.filteredCards = this.allCards;
+    // this.doFilter();
+    // this.Quiz.cardcount -= 1;
+    this.toast.loadToast('Card has been deleted.');
   }
 
   setFontSize() {

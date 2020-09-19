@@ -14,7 +14,7 @@ export class TabsPage {
     private audio: PlayAudio
   ) {}
 
-  async gotoTab(tab) {
+  gotoTab(tab) {
     this.audio.endAudio();
     this.navCtrl.navigateRoot('/tabs/' + tab);
   }

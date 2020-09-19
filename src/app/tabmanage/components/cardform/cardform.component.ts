@@ -13,6 +13,8 @@ import { File } from '@ionic-native/File/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
 import { AudiolistComponent } from '../audiolist/audiolist.component';
 import { PlayAudio } from 'src/app/shared/classes/playaudio';
+import { Quizdata } from 'src/app/services/quizdata.service';
+import { ToastNotification } from 'src/app/shared/classes/toast';
 
 @Component({
   selector: 'app-cardform',
@@ -42,6 +44,8 @@ export class CardformComponent implements OnInit, AfterViewChecked {
     private ach: Achievements,
     private modal: ModalController,
     private alert: AlertController,
+    private toast: ToastNotification,
+    private carddata: Quizdata,
     public audio: PlayAudio
   ) {
     this._quizId = this.route.snapshot.params.quizid;
@@ -70,7 +74,7 @@ export class CardformComponent implements OnInit, AfterViewChecked {
         is_hidden: 0
       };
       this.cardheader = 'Add Card';
-      if (this._addBefore) this.cardheader += ' (before card #' + (parseInt(this._addBefore, 10) + 1) + ')';
+      if (this._addBefore) this.cardheader += ' (before card #' + (parseInt(this._addBefore, 10)) + ')';
     } else {
       this.cardheader = 'Edit Card';
     }
@@ -114,14 +118,34 @@ export class CardformComponent implements OnInit, AfterViewChecked {
       // updating card
       await this.sqlite.updateCard(this.Card);
       this.ach.updateLocalAchievement(14, 1);
+
+      this.carddata.updateCardData({
+        id: this.Card.id,
+        c_text: this.Card.c_text.trim(),
+        c_study: this.Card.c_study.trim(),
+        c_image: this.Card.c_image,
+        c_audio: this.Card.c_audio
+      });
+      this.carddata.updateCard = true;
+      this.toast.loadToast('Card updated.');
     } else {
       // saving new card
       this.Card.id = uuid.v1();
-      if (this._addBefore) await this.sqlite.addCards([this.Card], true, parseInt(this._addBefore, 10));
-      else await this.sqlite.addCards([this.Card], true);
+      if (this._addBefore) await this.sqlite.addCards([this.Card], true, parseInt(this._addBefore, 10) - 1);
+      else await this.sqlite.addCards([this.Card], true, this.carddata.ccc);
       this.ach.updateLocalAchievement(11, 1);
-    }
 
+      this.carddata.addCardData({
+        id: this.Card.id,
+        c_text: this.Card.c_text.trim(),
+        c_study: this.Card.c_study.trim(),
+        c_image: this.Card.c_image,
+        c_audio: this.Card.c_audio,
+        cardorder: (this._addBefore) ? parseInt(this._addBefore, 10) - 1 : this.carddata.ccc
+      });
+      this.carddata.addCard = true;
+      this.toast.loadToast('Card added.');
+    }
     this.router.navigate(['/tabs/tabmanage/cards/', this._quizId]);
   }
 

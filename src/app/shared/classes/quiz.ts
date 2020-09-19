@@ -12,9 +12,9 @@ export class QuizClass {
   }
 
   setFontSize(content: string, img: string) {
-    if ((img && img !== '') || content.length > 115) return 'sm3';
-    else if (content.length > 95) return 'sm2';
-    else if (content.length > 55) return 'sm1';
+    if ((img && img !== '') || content.length > 100) return 'sm3';
+    else if (content.length > 70) return 'sm2';
+    else if (content.length > 40) return 'sm1';
     else return '';
   }
 

@@ -1,13 +1,12 @@
-import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Quiz } from 'src/app/models/quiz';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { SqliteService } from 'src/app/services/sqlite.service';
 import { AppSettings } from 'src/app/models/appsettings';
 import { Card } from 'src/app/models/card';
-import { AlertController, PopoverController, LoadingController, ModalController, NavController, Events } from '@ionic/angular';
+import { AlertController, PopoverController, LoadingController, ModalController, NavController } from '@ionic/angular';
 import { ToastNotification } from 'src/app/shared/classes/toast';
-import { CardformComponent } from '../cardform/cardform.component';
 import { CardpopoverComponent } from '../cardpopover/cardpopover.component';
 import { CardsetpopoverComponent } from '../cardsetpopover/cardsetpopover.component';
 import { MergecardsetComponent } from '../mergecardset/mergecardset.component';
@@ -15,13 +14,16 @@ import { NetworkService } from 'src/app/services/network.service';
 import { File } from '@ionic-native/File/ngx';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { QuizcardsExport } from 'src/app/shared/classes/quizcardsexport';
+import { Quizdata } from 'src/app/services/quizdata.service';
 
 @Component({
   selector: 'app-quizcards',
   templateUrl: './quizcards.component.html',
   styleUrls: ['./quizcards.component.scss'],
 })
+
 export class QuizcardsComponent implements OnInit {
+  _initLoad: boolean;
   _quizId: string;
   _cardsloaded: boolean;
   _limits: any;
@@ -29,9 +31,13 @@ export class QuizcardsComponent implements OnInit {
   _isPro: boolean;
   _color: string;
   _showSearch: boolean;
+  _curSlice = 1;
+  _filterTerm = '';
   Quiz: Quiz;
   allCards: Card[];
   filteredCards: Card[];
+  paginatedCards: Card[];
+  currentHighlite = undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -46,38 +52,100 @@ export class QuizcardsComponent implements OnInit {
     private network: NetworkService,
     private file: File,
     private keyboard: Keyboard,
-    private exportquiz: QuizcardsExport
+    private exportquiz: QuizcardsExport,
+    private quizdata: Quizdata
   ) {
     this._quizId = this.route.snapshot.params.quizid;
     this._cardsloaded = false;
   }
 
   async ngOnInit() {
-
-  }
-
-  async ionViewWillEnter() {
     if (this._quizId) {
       this._apps = await this.app.getAppSettings();
-      this.Quiz = await this.sqlite.getQuiz(this._quizId);
       this._limits = this.app.appLimits(this._apps.userStatus);
       this._isPro = this.app.isPro(this._apps.userStatus);
       this._showSearch = false;
+      console.log('init load');
+      this.loadQuiz();
+      this._initLoad = true;
+    }
+  }
 
-      if (this.Quiz) {
-        this.getCards();
+  async loadQuiz() {
+    this.Quiz = await this.sqlite.getQuiz(this._quizId);
+
+    if (this.Quiz) {
+      this.getCards();
+      if (this.quizdata.updateCount) {
+        this.Quiz.cardcount = this.quizdata.newQuizdata.cardcount;
+        this.quizdata.updateCount = false;
       }
     }
+  }
+
+  async ionViewWillEnter() {
+    this.currentHighlite = undefined;
+    if (this.quizdata.updateQuiz) {
+      this.Quiz.quizname = this.quizdata.newQuizdata.quizname;
+      this.Quiz.quizcolor = this.quizdata.newQuizdata.quizcolor;
+      this.quizdata.updateQuiz = false;
+    } else
+    if (this.quizdata.updateCard) {
+      for (let i = 0; i < this.allCards.length; i++) {
+        if (this.allCards[i].id === this.quizdata.newCarddata.id) {
+          this.allCards[i].c_text = this.quizdata.newCarddata.c_text;
+          this.allCards[i].c_study = this.quizdata.newCarddata.c_study;
+          this.allCards[i].c_image = this.quizdata.newCarddata.c_image;
+          this.allCards[i].c_audio = this.quizdata.newCarddata.c_audio;
+          break;
+        }
+      }
+      this.filteredCards = this.allCards;
+      this.doFilter();
+      this.quizdata.updateCard = false;
+    } else
+    if (this.quizdata.addCard) {
+      this.Quiz.cardcount += 1;
+      for (let i = this.quizdata.newCarddata.cardorder; i < this.allCards.length; i++) {
+        this.allCards[i].cardorder += 1;
+      }
+      this.allCards.splice(this.quizdata.newCarddata.cardorder, 0, this.quizdata.newCarddata);
+      // this.allCards.push(this.quizdata.newCarddata);
+      // console.log('new all cards', this.allCards);
+      this.filteredCards = this.allCards;
+      this.doFilter();
+      this.quizdata.addCard = false;
+    } else if (this._initLoad) {
+      console.log('enter view load');
+      this.loadQuiz();
+    }
+  }
+
+  trackCard(index, card) {
+    return card.id;
   }
 
   async getCards() {
     this.allCards = await this.sqlite.getQuizCards(this._quizId);
     this.filteredCards = this.allCards;
-    this.Quiz.cardcount = this.allCards.length;
+    this.paginateSet();
     this._cardsloaded = true;
   }
 
+  paginateSet() {
+    this.paginatedCards = this.filteredCards.slice(0, 250 * this._curSlice);
+  }
+
+  loadMoreCards() {
+    if (this.paginatedCards.length < this.filteredCards.length) {
+      this._curSlice++;
+      this.paginateSet();
+    }
+    return false;
+  }
+
   addCard(pos: number = null) {
+    this.quizdata.ccc = this.allCards.length;
     if (this.allCards.length >= this._limits.cardLimit) {
       let msg = 'You have reached the Personal limit of ' + this._limits.cardLimit + ' cards. Please upgrade to a Pro account to increase the card limit.';
       if (this._isPro) msg = 'Card sets have a limit of ' + this._limits.cardLimit + ' cards to ensure best app performance. Please create a new set.';
@@ -88,7 +156,7 @@ export class QuizcardsComponent implements OnInit {
       }).then(a => a.present());
       return;
     } else if (pos !== null) {
-      this.router.navigate(['/tabs/tabmanage/card/', this._quizId, '0', pos]);
+      this.router.navigate(['/tabs/tabmanage/card/', this._quizId, '0', pos + 1]);
     } else {
       this.router.navigate(['/tabs/tabmanage/card/', this._quizId]);
     }
@@ -98,18 +166,31 @@ export class QuizcardsComponent implements OnInit {
     this._showSearch = !this._showSearch;
     if (!this._showSearch) {
       this.filteredCards = this.allCards;
+      this.paginateSet();
     }
   }
 
   filterCards(term) {
     this.keyboard.hide();
-    term = term.toLowerCase();
-    this.filteredCards = this.allCards.filter((card) => {
-      return card.c_text.toLowerCase().includes(term) || card.c_study.toLowerCase().includes(term);
-    });
+    this._filterTerm = term.toLowerCase().trim();
+    this._curSlice = 1;
+    if (this._filterTerm === '') {
+      this.filteredCards = this.allCards;
+      this.paginateSet();
+    } else {
+      this.doFilter();
+    }
   }
 
-  async cardOptions(ev: any, cardId, orderId, isHidden) {
+  doFilter() {
+    this.filteredCards = this.allCards.filter((card) => {
+      return card.c_text.toLowerCase().includes(this._filterTerm) || card.c_study.toLowerCase().includes(this._filterTerm);
+    });
+    this.paginateSet();
+  }
+
+  async cardOptions(ev: any, card: Card, orderId) {
+    this.currentHighlite = card.cardorder;
     const popover = await this.pop.create({
       component: CardpopoverComponent,
       event: ev,
@@ -117,15 +198,16 @@ export class QuizcardsComponent implements OnInit {
       componentProps: {
         popover: this.pop,
         quizId: this._quizId,
-        cardId: cardId,
-        isHidden: isHidden,
-        deleteCard: () => this.deleteCardAlert(cardId),
+        cardId: card.id,
+        isHidden: card.is_hidden,
+        deleteCard: () => this.deleteCardAlert(card),
         addBefore: () => { this.pop.dismiss(); this.addCard(orderId); },
-        hideCard: () => { this.pop.dismiss(); this.hideCard(cardId); },
-        unhideCard: () => { this.pop.dismiss(); this.unhideCard(cardId); }
+        hideCard: () => { this.pop.dismiss(); this.hideCard(card.id); },
+        unhideCard: () => { this.pop.dismiss(); this.unhideCard(card.id); }
       },
       cssClass: 'standard-popover'
     });
+    popover.onWillDismiss().then(() => this.currentHighlite = undefined);
     return await popover.present();
   }
 
@@ -172,21 +254,28 @@ export class QuizcardsComponent implements OnInit {
     this.toast.loadToast('Card has been un-hidden.');
   }
 
-  deleteCardAlert(cardId) {
+  deleteCardAlert(card: Card) {
     this.alert.create({
       header: 'Delete Card',
       message: 'Are you sure you want to delete this Card? This action cannot be un-done.',
       buttons: [
         { text: 'Cancel', role: 'cancel', handler: () => {} },
-        { text: 'Yes', handler: () => this.deleteCard(cardId) }
+        { text: 'Yes', handler: () => this.deleteCard(card) }
       ]
     }).then(a => a.present());
   }
 
-  async deleteCard(cardId) {
-    this.allCards = await this.sqlite.deleteCard(cardId, this.allCards, this._quizId);
+  async deleteCard(card: Card) {
+    this.allCards.splice(card.cardorder, 1);
+    await this.sqlite.deleteCard(card, this.allCards, this._quizId);
+    console.log('remaining', this.allCards);
+    console.log('card order: ', card.cardorder);
+    for (let i = card.cardorder; i < this.allCards.length; i++) {
+      this.allCards[i].cardorder -= 1;
+    }
     this.filteredCards = this.allCards;
-    this.Quiz.cardcount = this.allCards.length;
+    this.doFilter();
+    this.Quiz.cardcount -= 1;
     this.toast.loadToast('Card has been deleted.');
   }
 
@@ -285,6 +374,10 @@ export class QuizcardsComponent implements OnInit {
     const loader = await this.loader.create({ message: 'Re-ordering cards...'});
     loader.present();
     this.allCards.sort(this.sortCompareCards);
+    for (let i = 0; i < this.allCards.length; i++) {
+      this.allCards[i].cardorder = i;
+    }
+    this.filteredCards = this.allCards;
     await this.sqlite.sortCards(this.allCards);
     loader.dismiss();
     this.toast.loadToast('Card re-ordering complete!');
@@ -305,6 +398,7 @@ export class QuizcardsComponent implements OnInit {
       this.Quiz.cardview = 'compact-view';
       msg = 'Changed to compact view.';
     }
+    this.filteredCards = this.allCards;
     await this.sqlite.updateCardView(this.Quiz);
     this.toast.loadToast(msg);
   }

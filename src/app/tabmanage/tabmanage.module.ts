@@ -19,6 +19,8 @@ import { TextToSpeech } from '@ionic-native/text-to-speech/ngx';
 import { PlayAudio } from '../shared/classes/playaudio';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
 import { Diagnostic } from '@ionic-native/diagnostic/ngx';
+import { Quizdata } from '../services/quizdata.service';
+import { FolderComponent } from './components/folder/folder.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +30,8 @@ import { Diagnostic } from '@ionic-native/diagnostic/ngx';
     CardpopoverComponent,
     CardsetpopoverComponent,
     MergecardsetComponent,
-    AudiolistComponent
+    AudiolistComponent,
+    FolderComponent
   ],
   entryComponents: [
     CardpopoverComponent,
@@ -40,6 +43,7 @@ import { Diagnostic } from '@ionic-native/diagnostic/ngx';
     SharedModule,
     RouterModule.forChild([
       { path: '', redirectTo: 'quiz', pathMatch: 'full' },
+      { path: 'folder', component: FolderComponent},
       { path: 'quiz/:quizid', component: QuizformComponent },
       { path: 'quiz', component: QuizformComponent },
       { path: 'cards/:quizid', component: QuizcardsComponent },
@@ -52,7 +56,8 @@ import { Diagnostic } from '@ionic-native/diagnostic/ngx';
     TextToSpeech,
     PlayAudio,
     Keyboard,
-    Diagnostic
+    Diagnostic,
+    Quizdata
   ]
 })
 export class TabmanagePageModule { }

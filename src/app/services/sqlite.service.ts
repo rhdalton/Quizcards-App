@@ -55,7 +55,7 @@ export class SqliteService {
           quizname VARCHAR,
           quizcolor VARCHAR,
           switchtext TINYINT,
-          cardcount TINYINT,
+          cardcount INTEGER,
           cardview VARCHAR,
           isArchived TINYINT,
           isMergeable TINYINT,
@@ -72,8 +72,10 @@ export class SqliteService {
           quizTimer TINYINT,
           studyShuffle TINYINT,
           quizShuffle TINYINT,
-          ttsSpeed TINYINT)`, []);
+          ttsSpeed TINYINT,
+          quizorder INTEGER)`, []);
         await this.db.executeSql('CREATE INDEX is_archived ON Quizzes(isArchived)', []);
+        await this.db.executeSql('CREATE INDEX quizorder ON Quizzes(quizorder)', []);
 
         await this.db.executeSql(`CREATE TABLE Cards (
           id VARCHAR PRIMARY KEY,
@@ -88,7 +90,7 @@ export class SqliteService {
           c_correct TEXT,
           c_study TEXT,
           c_substudy TEXT,
-          cardorder TINYINT,
+          cardorder SMALLINT,
           correct_count SMALLINT,
           is_hidden TINYINT)`, []);
         await this.db.executeSql('CREATE INDEX quiz_id ON Cards(quiz_id)', []);
@@ -128,7 +130,85 @@ export class SqliteService {
         this._apps.dbVersion = 1.4;
       }
 
-      this._apps.dbVersion = 1.4;
+      // DB Patch 1.5
+      // Add quizorder to Quizzes / alter Quizzes/Cards table column
+      if (this._apps.dbVersion === 1.4) {
+        await this.db.executeSql('ALTER TABLE Quizzes ADD COLUMN quizorder SMALLINT DEFAULT 0', []);
+        await this.db.executeSql('CREATE INDEX quizorder ON Quizzes(quizorder)', []);
+
+        await this.db.executeSql('ALTER TABLE Quizzes RENAME TO qtmp', []);
+        await this.db.executeSql(`CREATE TABLE Quizzes(
+          id VARCHAR PRIMARY KEY,
+          quizname VARCHAR,
+          quizcolor VARCHAR,
+          switchtext TINYINT,
+          cardcount INTEGER,
+          cardview VARCHAR,
+          isArchived TINYINT,
+          isMergeable TINYINT,
+          isBackable TINYINT,
+          isShareable TINYINT,
+          isPurchased TINYINT,
+          cloudId VARCHAR,
+          networkId VARCHAR,
+          shareId VARCHAR,
+          creator_name VARCHAR,
+          tts VARCHAR,
+          ttsaudio TINYINT,
+          quizLimit TINYINT,
+          quizTimer TINYINT,
+          studyShuffle TINYINT,
+          quizShuffle TINYINT,
+          ttsSpeed TINYINT,
+          quizorder SMALLINT)`, []);
+
+        await this.db.executeSql('CREATE INDEX is_archived ON Quizzes(isArchived)', []);
+        await this.db.executeSql('CREATE INDEX quizorder ON Quizzes(quizorder)', []);
+
+        await this.db.executeSql(`INSERT INTO Quizzes(
+          id, quizname, quizcolor, switchtext, cardcount, cardview, isArchived, isMergeable, isBackable, isShareable, isPurchased, cloudId, networkId,
+          shareId, creator_name, tts, ttsaudio, quizLimit, quizTimer, studyShuffle, quizShuffle, ttsSpeed, quizorder)
+          SELECT
+          id, quizname, quizcolor, switchtext, cardcount, cardview, isArchived, isMergeable, isBackable, isShareable, isPurchased, cloudId, networkId,
+          shareId, creator_name, tts, ttsaudio, quizLimit, quizTimer, studyShuffle, quizShuffle, ttsSpeed, quizorder
+          FROM qtmp`);
+
+        await this.db.executeSql(`DROP TABLE qtmp`);
+
+        await this.db.executeSql('ALTER TABLE Cards RENAME TO ctmp', []);
+
+        await this.db.executeSql(`CREATE TABLE Cards (
+          id VARCHAR PRIMARY KEY,
+          quiz_id VARCHAR,
+          c_text TEXT,
+          c_subtext TEXT,
+          c_image VARCHAR,
+          image_path VARCHAR,
+          c_audio VARCHAR,
+          audio_path VARCHAR,
+          c_video VARCHAR,
+          c_correct TEXT,
+          c_study TEXT,
+          c_substudy TEXT,
+          cardorder TINYINT,
+          correct_count SMALLINT,
+          is_hidden TINYINT)`, []);
+        await this.db.executeSql('CREATE INDEX quiz_id ON Cards(quiz_id)', []);
+        await this.db.executeSql('CREATE INDEX cardorder ON Cards(cardorder)', []);
+        await this.db.executeSql('CREATE INDEX correct_count ON Cards(correct_count)', []);
+
+        await this.db.executeSql(`INSERT INTO Cards(
+          id, quiz_id, c_text, c_subtext, c_image, image_path, c_audio, audio_path, c_video, c_correct, c_study, c_substudy, cardorder, correct_count, is_hidden)
+          SELECT
+          id, quiz_id, c_text, c_subtext, c_image, image_path, c_audio, audio_path, c_video, c_correct, c_study, c_substudy, cardorder, correct_count, is_hidden
+          FROM ctmp`);
+
+        await this.db.executeSql(`DROP TABLE ctmp`);
+
+        this._apps.dbVersion = 1.5;
+      }
+
+      this._apps.dbVersion = 1.5;
 
       await this.app.setAppSettings(this._apps);
     }
@@ -388,7 +468,7 @@ export class SqliteService {
       this.db = await this.cdb();
       if (this.db) {
         const items = [];
-        const result = await this.db.executeSql("SELECT * FROM Quizzes WHERE isArchived=?", [archive]);
+        const result = await this.db.executeSql("SELECT * FROM Quizzes WHERE isArchived=? ORDER BY quizorder ASC", [archive]);
         if (result) {
           for (let i = 0; i < result.rows.length; i++) {
             items.push(result.rows.item(i));
@@ -434,33 +514,31 @@ export class SqliteService {
 
         for (let i = 0; i < cards.length; i++) {
 
-          if (orderId !== null) _orderId = orderId + 1;
+          if (orderId !== null) _orderId = orderId;
           else if (incr) _orderId = quiz.cardcount + 1 + i;
-          else _orderId = cards[i].cardorder;
+          else _orderId = cards[i].cardorder || i;
 
           const newCard = [
             cards[i].id,
             cards[i].quiz_id,
-            cards[i].c_text,
-            cards[i].c_subtext,
+            cards[i].c_text.trim(),
+            cards[i].c_subtext.trim(),
             cards[i].c_image,
             cards[i].image_path,
             cards[i].c_audio,
             cards[i].audio_path,
             cards[i].c_video,
-            cards[i].c_correct,
-            cards[i].c_study,
-            cards[i].c_substudy,
+            cards[i].c_correct.trim(),
+            cards[i].c_study.trim(),
+            cards[i].c_substudy.trim(),
             _orderId,
             cards[i].correct_count,
             cards[i].is_hidden
           ];
 
+          if (orderId !== null) await this.db.executeSql('UPDATE Cards SET cardorder = cardorder + 1 WHERE quiz_id = ? AND cardorder >= ?', [cards[i].quiz_id, _orderId]);
           await this.db.executeSql('INSERT INTO Cards VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', newCard);
           if (incr) await this.db.executeSql('UPDATE Quizzes SET cardcount = cardcount+1 WHERE id =?', [cards[i].quiz_id]);
-          if (orderId !== null) {
-            await this.db.executeSql('UPDATE Cards SET cardorder = cardorder + 1 WHERE quiz_id = ? AND cardorder >= ?', [cards[i].quiz_id, _orderId]);
-          }
         }
       }
     } else {
@@ -483,15 +561,15 @@ export class SqliteService {
       if (this.db) {
 
         const updateCard = [
-          card.c_text,
-          card.c_subtext,
+          card.c_text.trim(),
+          card.c_subtext.trim(),
           card.c_image,
           card.image_path,
           card.c_audio,
           card.audio_path,
-          card.c_correct,
-          card.c_study,
-          card.c_substudy,
+          card.c_correct.trim(),
+          card.c_study.trim(),
+          card.c_substudy.trim(),
           card.id
         ];
 
@@ -527,30 +605,19 @@ export class SqliteService {
     }
   }
 
-  async deleteCard(cardId, cards: Card[], quizId: string) {
+  async deleteCard(card: Card, cards: Card[], quizId: string) {
     // is device
     if (this.platform.is('cordova')) {
       this.db = await this.cdb();
       if (this.db) {
-        let neworder = 0;
-        let splice: number;
-        await this.db.executeSql('DELETE FROM Cards WHERE id=?', [cardId]);
+        await this.db.executeSql('DELETE FROM Cards WHERE id=?', [card.id]);
         await this.db.executeSql('UPDATE Quizzes SET cardcount = cardcount-1 WHERE id=?', [quizId]);
-        for (let i = 0; i < cards.length; i++) {
-          if (cards[i].id === cardId) {
-            splice = i;
-            if (cards[i].image_path && cards[i].image_path !== '') this.images.deleteImage(cards[i].image_path);
-          } else {
-            neworder++;
-            await this.db.executeSql('UPDATE Cards SET cardorder=? WHERE id=?', [neworder, cards[i].id]);
-          }
-        }
-        cards.splice(splice, 1);
-        return cards;
+        if (card.image_path && card.image_path !== '') this.images.deleteImage(card.image_path);
+        await this.db.executeSql('UPDATE Cards SET cardorder=cardorder - 1 WHERE quiz_id=? AND cardorder > ?', [quizId, card.cardorder]);
       }
     } else {
       // webstorage
-      return await this.webstorage.deleteCard(cardId, cards, quizId);
+      await this.webstorage.deleteCard(card.id, cards, quizId);
     }
   }
 
@@ -590,7 +657,7 @@ export class SqliteService {
       this.db = await this.cdb();
       if (this.db) {
         for (let i = 0; i < cards.length; i++) {
-          await this.db.executeSql("UPDATE Cards SET cardorder=? WHERE id=?", [i + 1, cards[i].id]);
+          await this.db.executeSql("UPDATE Cards SET cardorder=? WHERE id=?", [cards[i].cardorder, cards[i].id]);
         }
       }
     } else {

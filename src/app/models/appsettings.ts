@@ -16,4 +16,5 @@ export interface AppSettings {
   dayDifference?: number;
   studiedTodayCount?: number;
   studiedToday?: boolean;
+  multiChoiceNum?: number;
 }

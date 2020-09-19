@@ -12,6 +12,7 @@ import { InAppPurchase2 } from '@ionic-native/in-app-purchase-2/ngx';
 import { BadgesComponent } from './components/badges/badges.component';
 import { Achievements } from '../shared/classes/achievements';
 import { AchievemodalComponent } from './components/achievemodal/achievemodal.component';
+import { QcgroupsComponent } from './components/qcgroups/qcgroups.component';
 
 const routes: Routes = [
   { path: '', component: TabaccountPage },
@@ -20,7 +21,8 @@ const routes: Routes = [
   { path: 'usercloud/:backupid', component: UsercloudComponent },
   { path: 'usercloud', component: UsercloudComponent },
   { path: 'upgradepro', component: UpgradeproComponent },
-  { path: 'badges', component: BadgesComponent }
+  { path: 'badges', component: BadgesComponent },
+  { path: 'qcgroups', component: QcgroupsComponent }
 ];
 
 @NgModule({
@@ -39,7 +41,8 @@ const routes: Routes = [
     UsercloudComponent,
     UpgradeproComponent,
     BadgesComponent,
-    AchievemodalComponent
+    AchievemodalComponent,
+    QcgroupsComponent
   ],
   providers: [
     InAppPurchase2

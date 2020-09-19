@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, Injectable } from '@angular/core';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuth, AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule, FirestoreSettingsToken } from '@angular/fire/firestore';
@@ -29,6 +29,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { Media } from '@ionic-native/media/ngx';
 import { Networkcategories } from './shared/classes/networkcategories';
 
+@Injectable()
 export class CustomHammerConfig extends HammerGestureConfig  {
   overrides = {
       'pinch': { enable: false },

@@ -109,21 +109,10 @@ export class WebstorageService {
   }
 
   async deleteCard(cardId, cardlist, quizId) {
-    let splice: number;
-    let neworder = 0;
-
     for (let i = 0; i < cardlist.length; i++) {
-      if (cardlist[i].id === cardId) {
-        splice = i;
-        // if (cardlist[i].image_path && cardlist[i].image_path !== '') this.images.deleteImage(cardlist[i].image_path);
-      } else {
-        neworder++;
-        cardlist[i].cardorder = neworder;
-      }
+      cardlist[i].cardorder = i;
     }
-    cardlist.splice(splice, 1);
     await this.saveQuizCards(cardlist, quizId);
-    return cardlist;
   }
 
   async reorderCards(cards: Card[]) {

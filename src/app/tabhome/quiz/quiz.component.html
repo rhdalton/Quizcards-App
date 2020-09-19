@@ -10,21 +10,17 @@
         <div class="card-text {{fontsize}} {{qcardsize}}">
           <div *ngIf="Quiz.switchtext==0; else switch">            
             <div [hidden]="Quiz.ttsaudio==1">
-              <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image" src="{{Card.c_image}}" />
-              {{Card.c_text}}
-              <div [hidden]="!Card.c_subtext" class="sm card-subtext">
-                {{Card.c_subtext}}
-              </div>
+              <img *ngIf="Card.c_image && Card.c_image!=''" class="card-image" src="{{Card.c_image}}" /><!--
+            -->{{Card.c_text}}
+              <div [hidden]="!Card.c_subtext" class="sm card-subtext">{{Card.c_subtext}}</div>
             </div>
             <div [hidden]="!Card.c_audio && !Quiz.tts" class="card-audio">
               <ion-icon name="volume-high" class="audio-large" [class.audio-large-active]="audio.audioActive" (click)="audio.playAudio(300, Card, Quiz)"></ion-icon>
             </div>
           </div>
-          <ng-template #switch>
-            {{Card.c_study}}
-            <div [hidden]="!Card.c_substudy" class="sm card-subtext">
-              {{Card.c_substudy}}
-            </div>
+          <ng-template #switch><!--
+          -->{{Card.c_study}}
+            <div [hidden]="!Card.c_substudy" class="sm card-subtext">{{Card.c_substudy}}</div>
           </ng-template>
         </div>
         <div class="card-options">

@@ -17,10 +17,23 @@
   </ion-item-divider>
 
   <ion-item-divider>
+    <ion-select slot="end" (ionChange)="setMultiChoice($event)" value="{{_app.multiChoiceNum}}">
+      <ion-select-option value="2">2</ion-select-option>
+      <ion-select-option value="3">3</ion-select-option>
+      <ion-select-option value="4">4</ion-select-option>
+      <ion-select-option value="5">5</ion-select-option>
+    </ion-select>
+    <div>
+      Multiple choice options
+      <div dir="ltr" class="sm">Number of options to display in Multiple Choice Quiz Mode</div>
+    </div>
+  </ion-item-divider>
+
+  <ion-item-divider>
     <ion-toggle slot="end" (ionChange)="toggleSetting()" [(ngModel)]="_app.rtl"></ion-toggle>
     <div>
-      App RTL view
-      <div dir="ltr" class="sm">App restart required to see change.</div>
+      Right-to-Left view
+      <div dir="ltr" class="sm">Enable only for languages that read right to left.<br /> App restart required to see change.</div>
     </div>
   </ion-item-divider>
   

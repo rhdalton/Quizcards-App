@@ -164,7 +164,9 @@ export class QuizComponent implements OnInit {
 
     // loop through 3 times to add random wrong answers to answerChoices
     let x = 1;
-    while (x <= 3) {
+    const multiChoiceNumber = (this._app.multiChoiceNum) ? this._app.multiChoiceNum - 1 : 3;
+    console.log('multi', multiChoiceNumber);
+    while (x <= multiChoiceNumber) {
       const take = allChoices.pop();
       if (!take) {
         answerChoices.push([x, '']);

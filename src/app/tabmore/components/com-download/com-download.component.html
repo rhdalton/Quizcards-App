@@ -21,15 +21,13 @@
   </div>
   {{ noPreview }}
   <div *ngIf="quizData" style="height:200px;overflow-y:scroll;" dir="ltr">
-    <ion-card *ngFor="let c of quizData.cards | slice:0:25" class="qcard quiz-color-white">
-      <ion-card-content>
-        <div class="preview-card">
-          {{c.txt}}
-        </div>
-        <div class="preview-answer">
-          {{c.study}}
-        </div>
-      </ion-card-content>
-    </ion-card>
+    <div *ngFor="let c of quizData.cards | slice:0:25" class="ion-card qcard quiz-color-white">
+      <div class="preview-card">
+        {{c.txt}}
+      </div>
+      <div class="preview-answer">
+        {{c.study}}
+      </div>
+    </div>
   </div>
 </div>

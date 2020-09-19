@@ -33,28 +33,29 @@
       No cards found with your search term.
     </ion-card-content>
   </ion-card>
-
-  <ion-virtual-scroll [items]="filteredCards" approxItemHeight="80px">
-    <ion-card 
-      *virtualItem="let c; let i = index" 
-      class="qcard cardlist quiz-color-white" 
-      [class.compact-view]="allCards.length>0 && Quiz.cardview=='compact-view'"
+  <div style="height:calc(100vh - 160px);overflow-y:scroll;padding-bottom:30px;">
+    <div
+      #carditem
+      *ngFor="let c of paginatedCards; let i = index;"      
+      trackBy="trackCard"
+      class="ion-card qcard cardlist quiz-color-white {{c.id}}" 
+      [class.card-highlite]="c.cardorder == currentHighlite"
+      [class.compact-view]="allCards.length > 0 && Quiz.cardview=='compact-view'"
       [class.hidden-card]="c.is_hidden == 1">
-      <ion-card-content>
-        <div class="right">
-          <div (click)="cardOptions($event, c.id, i, c.is_hidden)" class="edit-card" [class.hidden-edit]="c.is_hidden"></div>
-        </div>
-          {{ i + 1 }}. 
-          <div *ngIf="c.c_image && Quiz.cardview=='detail-view'">
-            <ion-img  class="card-image image-small" [src]="c.c_image"></ion-img>
-          </div>
-          <img *ngIf="c.c_image && Quiz.cardview=='compact-view'" src="assets/icon/uploadimage.svg" style="vertical-align:top;display:inline-block;width:23px;">
-          <img *ngIf="c.c_audio" src="assets/icon/audiofile.svg" style="vertical-align:top;display:inline-block;width:23px;">
-          <span *ngIf="c.c_audio && Quiz.cardview=='detail-view'" class="sm">&nbsp; [{{c.c_audio}}]<br /></span>
-          {{c.c_text}}
-        <div *ngIf="Quiz.cardview=='detail-view'" class="card-detail">{{c.c_correct}}</div>
-      </ion-card-content>
-    </ion-card>
-  </ion-virtual-scroll>
-  <div style="padding-top:50px;"></div>
+
+        <div (click)="cardOptions($event, c, i)" class="edit-card right" [class.hidden-edit]="c.is_hidden"></div>
+        <span class="sm">{{ c.cardorder + 1 }}.</span> 
+        <span *ngIf="c.c_image && Quiz.cardview=='detail-view'"><img class="card-image image-small" src="{{c.c_image}}"><br /></span>
+        <img *ngIf="c.c_image && Quiz.cardview=='compact-view'" src="assets/icon/uploadimage.svg" class="media-icon">
+        <img *ngIf="c.c_audio" src="assets/icon/audiofile.svg" class="media-icon">
+        <span *ngIf="c.c_audio && Quiz.cardview=='detail-view'" class="sm">&nbsp; [{{c.c_audio}}]<br /></span>
+        {{c.c_text}}
+        <div *ngIf="Quiz.cardview=='detail-view'" class="card-detail">{{c.c_study}}</div>
+    </div>
+
+    <div #showmore *ngIf="_cardsloaded && filteredCards.length > paginatedCards.length" class="sm" style="padding:0 10px;text-align:center">
+      Showing {{250 * _curSlice}} of {{filteredCards.length}} <span *ngIf="_filterTerm">(filtered)</span> cards
+      <div class="qcard ion-card" (click)="loadMoreCards()" style="padding:10px;text-align:center;margin:0;background:#f4f5f8;">Load more cards</div>
+    </div>
+  </div>
 </ion-content>

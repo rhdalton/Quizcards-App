@@ -8,6 +8,7 @@ import { Storage } from '@ionic/storage';
 import { Router } from '@angular/router';
 import { Achievements } from 'src/app/shared/classes/achievements';
 import { Keyboard } from '@ionic-native/keyboard/ngx';
+import { Quizdata } from 'src/app/services/quizdata.service';
 
 @Component({
   selector: 'app-home',
@@ -22,12 +23,9 @@ export class HomePage implements OnInit {
 
   constructor(
     private sqlite: SqliteService,
-    private toast: ToastNotification,
     private pop: PopoverController,
     private alert: AlertController,
     private router: Router,
-    private storage: Storage,
-    private ach: Achievements,
     private keyboard: Keyboard
   ) { }
 
@@ -37,6 +35,10 @@ export class HomePage implements OnInit {
     // this.ach.updateLocalAchievement(13, 1);
     this.Quizzes = [];
     this._homeLoaded = true;
+  }
+
+  goToQuiz(quizId) {
+    this.router.navigate(['/tabs/tabmanage/cards', quizId]);
   }
 
   showFilter() {

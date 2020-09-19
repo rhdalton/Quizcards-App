@@ -5,6 +5,7 @@ import { SqliteService } from 'src/app/services/sqlite.service';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { Router } from '@angular/router';
 import { ToastNotification } from 'src/app/shared/classes/toast';
+import { Quizdata } from 'src/app/services/quizdata.service';
 
 @Component({
   selector: 'app-mergecardset',
@@ -24,7 +25,8 @@ export class MergecardsetComponent implements OnInit {
     private sqlite: SqliteService,
     private alert: AlertController,
     private router: Router,
-    private toast: ToastNotification
+    private toast: ToastNotification,
+    public quizdata: Quizdata
   ) {
     this._modal = this.params.get('modal');
     this._userStatus = this.params.get('userStatus');
@@ -69,6 +71,8 @@ export class MergecardsetComponent implements OnInit {
   async merge(quiz: Quiz) {
     this._modal.dismiss();
     this.sqlite.mergeCardSets(this._quizId, quiz.id, this._cardcount, quiz.cardcount);
+    this.quizdata.updateQuizcount(this._cardcount + quiz.cardcount);
+    this.quizdata.updateCount = true;
     this.toast.loadToast('Card set merge successful.');
     this.router.navigate(['/tabs/tabmanage/cards', quiz.id]);
   }
@@ -76,5 +80,4 @@ export class MergecardsetComponent implements OnInit {
   close() {
     this._modal.dismiss();
   }
-
 }

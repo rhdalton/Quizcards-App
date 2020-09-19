@@ -36,18 +36,12 @@ export class TabmorePage implements OnInit {
   }
 
   gotoCommunity() {
-    if (!this.network.isOnline()) {
-      this.network.alertOffline('access QuizCards community');
-      return;
-    }
+    if (!this.network.isOnline()) this.network.alertOffline('access QuizCards community');
     this.router.navigate(["/tabs/tabmore/community"]);
   }
 
   gotoSharecode() {
-    if (!this.network.isOnline()) {
-      this.network.alertOffline('download a shared card set');
-      return;
-    }
+    if (!this.network.isOnline()) this.network.alertOffline('download a shared card set');
     this.router.navigate(["/tabs/tabmore/sharecode"]);
   }
 }

@@ -127,11 +127,10 @@ export class SharecodeComponent implements OnInit {
 
     if (sharedQuiz.imageData) {
       for (let i = 0; i < sharedQuizJson.cards.length; i++) {
-        if (sharedQuizJson.cards[i].img !== '') {
+        if (sharedQuizJson.cards[i].img && sharedQuizJson.cards[i].img !== '') {
           const fn = sharedQuizJson.cards[i].imgp.substr(sharedQuizJson.cards[i].imgp.lastIndexOf('/') + 1);
           const imgUrl = await this.images.storageRef.child('shared/' + sharedQuiz.shareId + '/' + fn).getDownloadURL();
           const downloadedImage = await this.images.downloadFirebaseImageToDevice(imgUrl);
-          // this.toast.loadToast(downloadedImage.c_image, 10);
           sharedQuizJson.cards[i].img = downloadedImage.c_image;
           sharedQuizJson.cards[i].imgp = downloadedImage.image_path;
         }

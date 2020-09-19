@@ -12,8 +12,8 @@ export class AppdataClass {
 
   constructor(
     private storage: Storage) {
-    this.appv = 11.28;
-    this.latestdbv = 1.4;
+    this.appv = 11.34;
+    this.latestdbv = 1.5;
   }
 
   async getAppSettings() {
@@ -37,7 +37,8 @@ export class AppdataClass {
         appLastStart: curDate,
         dayDifference: 0,
         studiedTodayCount: 0,
-        studiedToday: false
+        studiedToday: false,
+        multiChoiceNum: 4
       };
       await this.setAppSettings(newSettings);
       return newSettings;
@@ -68,7 +69,7 @@ export class AppdataClass {
   appLimits(rank = '') {
     if (rank === 'pro') {
       return {
-        cardLimit: 200,
+        cardLimit: 1000,
         cloudLimit: 20
       };
     }

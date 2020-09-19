@@ -9,6 +9,10 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       {
+        path: '',
+        redirectTo: 'tabhome'
+      },
+      {
         path: 'tabhome',
         loadChildren: '../tabhome/tabhome.module#TabhomeModule'
       },

@@ -7,6 +7,7 @@ import { SqliteService } from 'src/app/services/sqlite.service';
 import { AppdataClass } from 'src/app/shared/classes/appdata';
 import { NavController } from '@ionic/angular';
 import { Achievements } from 'src/app/shared/classes/achievements';
+import { Quizdata } from 'src/app/services/quizdata.service';
 
 @Component({
   selector: 'app-quizform',
@@ -29,7 +30,8 @@ export class QuizformComponent {
     private router: Router,
     private sqlite: SqliteService,
     private app: AppdataClass,
-    private ach: Achievements
+    private ach: Achievements,
+    private quizdata: Quizdata
   ) {
     this.ttsfield = [
       { tts: '', text: 'Disable' },
@@ -119,6 +121,9 @@ export class QuizformComponent {
     } else {
       // update quiz
       await this.sqlite.updateQuiz(this.Quiz);
+
+      this.quizdata.updateQuizData({ quizname: this.Quiz.quizname, quizcolor: this.Quiz.quizcolor });
+      this.quizdata.updateQuiz = true;
     }
 
     const curAch = await this.ach.getAchievements();

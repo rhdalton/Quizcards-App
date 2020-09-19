@@ -37,9 +37,11 @@ export class ComHomeComponent implements OnInit {
 
   async updateQuizList() {
     if (!this.allQuizLists[this.current_cat_key]) {
-      this._loader = await this.load.create({ message: 'Loading Community Cards...'});
-      this._loader.present();
-      console.log('fetching..');
+      if (this.network.isOnline()) {
+        this._loader = await this.load.create({ message: 'Loading Community Cards...'});
+        this._loader.present();
+        console.log('fetching..');
+      }
       this.allQuizLists[this.current_cat_key] = [];
       this.allQuizLists[this.current_cat_key] = await this.firestoreService.getNetworkQuizzes('', this.current_cat, this.current_subcat);
       this._loader.dismiss();
